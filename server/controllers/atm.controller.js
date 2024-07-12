@@ -1,20 +1,23 @@
+const jwt = require('jsonwebtoken');
 const User = require('../models/account.model');
 const ATM = require('../models/atm.model');
 const { dispenseCash } = require('../utils/cashDispenser.utils');
-const sessionStore = require('../utils/sessionStore.utils');
+require("dotenv").config();
+
+const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_EXPIRATION = '2m';
 
 exports.checkAccount = async (req, res) => {
   try {
     const { accountNumber } = req.body;
     const user = await User.findOne({ accountNumber });
     if (user) {
-      const token = sessionStore.createSession({ accountNumber });
+      const token = jwt.sign({ accountNumber }, JWT_SECRET, { expiresIn: JWT_EXPIRATION });
       res.json({
         success: true,
         token
       });
-    }
-    else {
+    } else {
       res.json({
         success: false,
       });
@@ -30,15 +33,17 @@ exports.checkAccount = async (req, res) => {
 exports.checkPin = async (req, res) => {
   try {
     const { token, pin } = req.body;
-    const session = sessionStore.getSession(token);
-    if (!session) {
+    let decoded;
+    try {
+      decoded = jwt.verify(token, JWT_SECRET);
+    } catch (err) {
       return res.status(401).json({
         success: false,
         message: 'Session expired',
       });
     }
 
-    const user = await User.findOne({ accountNumber: session.accountNumber });
+    const user = await User.findOne({ accountNumber: decoded.accountNumber });
     if (!user || user.pin !== pin) {
       return res.status(400).json({
         success: false,
@@ -66,21 +71,25 @@ exports.withdraw = async (req, res) => {
         message: 'denomination not fulfilled'
       });
     }
-    const session = sessionStore.getSession(token);
-    if (!session) {
+
+    let decoded;
+    try {
+      decoded = jwt.verify(token, JWT_SECRET);
+    } catch (err) {
       return res.status(401).json({
         success: false,
         message: 'Session expired'
       });
     }
-    const user = await User.findOne({ accountNumber: session.accountNumber });
+
+    const user = await User.findOne({ accountNumber: decoded.accountNumber });
     if (user.balance < amount) {
       return res.status(400).json({
         success: false,
         message: 'Insufficient Balance',
       });
     }
-    
+
     const atm = await ATM.findOne();
     if (atm.notes[denomination] === 0) {
       return res.status(503).json({
@@ -90,7 +99,6 @@ exports.withdraw = async (req, res) => {
     }
 
     const { notesToDispense, remainingAmount } = dispenseCash(amount, denomination, atm);
-    console.log(notesToDispense);
     if (remainingAmount > 0) {
       return res.status(503).json({
         success: false,
@@ -112,10 +120,6 @@ exports.withdraw = async (req, res) => {
     user.balance -= amount;
     await user.save();
     await ATM.updateOne({}, atm);
-    sessionStore.deleteSession(token);
-
-    console.log(user.balance);
-    console.log(notesToDispense);
 
     return res.status(200).json({
       success: true,

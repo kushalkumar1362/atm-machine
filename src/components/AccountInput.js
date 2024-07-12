@@ -7,12 +7,14 @@ const AccountInput = ({ setToken }) => {
   const navigate = useNavigate();
 
   const handleNext = async () => {
+    const baseURL = process.env.REACT_APP_API_BASE_URL || 'https://localhost:2003';
+    const endpoint = '/atm/check-account';
     try {
       if (accountNumber.length < 8) {
         setError('Please Enter the Account Number of Length 8');
         return;
       }
-      const response = await fetch('http://localhost:2003/atm/check-account', {
+      const response = await fetch(`${baseURL}${endpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -35,7 +37,7 @@ const AccountInput = ({ setToken }) => {
 
   return (
     <div className="flex flex-col items-center justify-center">
-      <h1 className="text-2xl mb-4">Enter Account Number</h1>
+      <h2 className="text-2xl mb-4">Enter Account Number</h2>
       <input
         type="text"
         className="border p-2"
@@ -44,7 +46,7 @@ const AccountInput = ({ setToken }) => {
         onChange={(e) => setAccountNumberState(e.target.value)}
       />
       {error && <p className="text-red-500">{error}</p>}
-      <button onClick={handleNext} className="bg-blue-500 hover:bg-blue-600 font-semibold text-[20px] text-white py-2 px-10 rounded mt-6">
+      <button onClick={handleNext} className="bg-blue-500 text-white py-2 px-4 rounded mt-4">
         Next
       </button>
     </div>
