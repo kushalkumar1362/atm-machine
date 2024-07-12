@@ -5,13 +5,13 @@ const PinInput = ({ token }) => {
   const [pin, setPin] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
-  let incorrectPin = 1;
 
   const handleNext = async () => {
     const baseURL = process.env.REACT_APP_API_BASE_URL || 'https://localhost:2003';
     const endpoint = '/atm/check-pin';
     try {
       if (pin.length === 0) {
+        setPin('');
         setError('Please Enter the Pin');
         return;
       }
@@ -31,15 +31,27 @@ const PinInput = ({ token }) => {
           alert("Session Expired");
           navigate('/');
         }
-        setError(data.message);
-        incorrectPin += 1;
-        if (incorrectPin === 3) {
-          alert("Attempted Failed");
+        else if (data.message === 'Account is blocked for 24 Hours. Try again later.') {
+          alert("Account is blocked. Try again later.");
           navigate('/');
         }
+        else {
+          setError(data.message);
+        }
+        setPin('');
       }
     } catch (error) {
       setError('Failed to connect to the server');
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    if (/^\d*$/.test(value)) {
+      setPin(value);
+      setError('');
+    } else {
+      setError('Only numbers are allowed.');
     }
   };
 
@@ -51,7 +63,7 @@ const PinInput = ({ token }) => {
         className="border p-2"
         placeholder="PIN"
         value={pin}
-        onChange={(e) => setPin(e.target.value)}
+        onChange={handleInputChange}
       />
       {error && <p className="text-red-500">{error}</p>}
       <button onClick={handleNext} className="bg-blue-500 text-white py-2 px-4 rounded mt-4">

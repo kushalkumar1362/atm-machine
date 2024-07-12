@@ -17,7 +17,14 @@ const accountSchema = new mongoose.Schema({
   pin: {
     type: String,
     required: true
-  }
+  },
+  failedAttempts: {
+    type: Number,
+    default: 0,
+  },
+  blockUntil: {
+    type: Date
+  },
 });
 
 module.exports = mongoose.model('Account', accountSchema);

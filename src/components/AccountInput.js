@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const AccountInput = ({ setToken }) => {
-  const [accountNumber, setAccountNumberState] = useState('');
+  const [accountNumber, setAccountNumber] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
@@ -10,7 +10,8 @@ const AccountInput = ({ setToken }) => {
     const baseURL = process.env.REACT_APP_API_BASE_URL || 'https://localhost:2003';
     const endpoint = '/atm/check-account';
     try {
-      if (accountNumber.length < 8) {
+      if (accountNumber.length !== 8) {
+        setAccountNumber('');
         setError('Please Enter the Account Number of Length 8');
         return;
       }
@@ -29,10 +30,21 @@ const AccountInput = ({ setToken }) => {
         navigate('/pin');
       } else {
         setToken(null);
-        setError('Account not found');
+        setAccountNumber('');
+        setError(data.message);
       }
     } catch (error) {
       setError('Failed to connect to the server');
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    if (/^\d*$/.test(value)) {
+      setAccountNumber(value);
+      setError('');
+    } else {
+      setError('Only numbers are allowed.');
     }
   };
 
@@ -44,7 +56,7 @@ const AccountInput = ({ setToken }) => {
         className="border p-2"
         placeholder="Account Number"
         value={accountNumber}
-        onChange={(e) => setAccountNumberState(e.target.value)}
+        onChange={handleInputChange}
       />
       {error && <p className="text-red-500">{error}</p>}
       <button onClick={handleNext} className="bg-blue-500 text-white py-2 px-4 rounded mt-4">
