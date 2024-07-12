@@ -15,13 +15,13 @@ mongoose.connect(process.env.MONGODB_URL, { useNewUrlParser: true, useUnifiedTop
       {
         name: 'John Doe',
         accountNumber: '12345671',
-        balance: 5000,
+        balance: 50000,
         pin: '1234'
       },
       {
         name: 'Jane Smith',
         accountNumber: '12345672',
-        balance: 3000,
+        balance: 10000,
         pin: '5678'
       },
       {
