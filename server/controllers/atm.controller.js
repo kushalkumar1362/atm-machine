@@ -65,12 +65,7 @@ exports.checkPin = async (req, res) => {
 exports.withdraw = async (req, res) => {
   try {
     const { token, amount, denomination } = req.body;
-    if (amount < denomination) {
-      return res.status(401).json({
-        success: false,
-        message: 'denomination not fulfilled'
-      });
-    }
+    const denominationNumber = parseInt(denomination, 10);
 
     let decoded;
     try {
@@ -79,6 +74,13 @@ exports.withdraw = async (req, res) => {
       return res.status(401).json({
         success: false,
         message: 'Session expired'
+      });
+    }
+
+    if (amount < denominationNumber) {
+      return res.status(401).json({
+        success: false,
+        message: 'Denomination not fulfilled',
       });
     }
 
