@@ -15,14 +15,20 @@ mongoose.connect(process.env.MONGODB_URL, {})
       {
         name: 'John Doe',
         accountNumber: '1111111111111111',
-        balance: 50000,
-        pin: '1234'
+        balance: 1000,
+        pin: '1111'
       },
       {
         name: 'Jane Smith',
         accountNumber: '2222222222222222',
-        balance: 10000,
-        pin: '4321'
+        balance: 2000,
+        pin: '2222'
+      },
+      {
+        name: 'Jane Smith',
+        accountNumber: '3333333333333333',
+        balance: 20000,
+        pin: '3333'
       },
     ];
 

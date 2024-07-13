@@ -3,6 +3,7 @@ const User = require('../models/account.model');
 const ATM = require('../models/atm.model');
 const { dispenseCash } = require('../utils/cashDispenser.utils');
 const Transaction = require('../models/transaction.model');
+const Blacklist = require('../models/blockToken.model');
 require("dotenv").config();
 
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -10,6 +11,11 @@ const JWT_EXPIRATION = '2m';
 
 const isAccountBlocked = (user) => {
   return user.blockUntil && new Date() < new Date(user.blockUntil);
+};
+
+const isTokenBlacklisted = async (token) => {
+  const blacklistedToken = await Blacklist.findOne({ token });
+  return !!blacklistedToken;
 };
 
 exports.checkAccount = async (req, res) => {
@@ -44,8 +50,14 @@ exports.checkAccount = async (req, res) => {
 };
 
 exports.checkPin = async (req, res) => {
+  const { token, pin } = req.body;
   try {
-    const { token, pin } = req.body;
+    if (await isTokenBlacklisted(token)) {
+      return res.status(401).json({
+        success: false,
+        message: 'Session expired',
+      });
+    }
     let decoded;
     try {
       decoded = jwt.verify(token, JWT_SECRET);
@@ -87,22 +99,27 @@ exports.checkPin = async (req, res) => {
         user.blockUntil = new Date(new Date().getTime() + 24 * 60 * 60 * 1000);
       }
       await user.save();
+
+      const blacklistedToken = new Blacklist({ token });
+      await blacklistedToken.save();
       return res.status(400).json({
         success: false,
         message: 'Invalid Pin',
       });
     }
 
-    user.failedAttempts = 0;
     user.blockUntil = null;
     await user.save();
 
     return res.status(200).json({
       success: true,
+      message:"Pin verified Successfullly",
       token,
     });
   } catch (error) {
     console.log(error);
+    const blacklistedToken = new Blacklist({ token });
+    await blacklistedToken.save();
     return res.status(400).json({
       success: false,
       message: error.message,
@@ -114,7 +131,12 @@ exports.withdraw = async (req, res) => {
   try {
     const { token, amount, denomination } = req.body;
     const denominationNumber = parseInt(denomination, 10);
-
+    if (await isTokenBlacklisted(token)) {
+      return res.status(401).json({
+        success: false,
+        message: 'Session expired',
+      });
+    }
     let decoded;
     try {
       decoded = jwt.verify(token, JWT_SECRET);
@@ -125,6 +147,13 @@ exports.withdraw = async (req, res) => {
       });
     }
 
+    if (amount.length === 0) {
+      return res.status(401).json({
+        success: false,
+        message: 'Please Enter the amount',
+      });
+    }
+
     if (amount < denominationNumber) {
       return res.status(401).json({
         success: false,
@@ -132,8 +161,17 @@ exports.withdraw = async (req, res) => {
       });
     }
 
+    if (amount >= 10000) {
+      return res.status(401).json({
+        success: false,
+        message: 'Amount should be less than or equal to 10000',
+      });
+    }
+
     const user = await User.findOne({ accountNumber: decoded.accountNumber });
     if (user.balance < amount) {
+      const blacklistedToken = new Blacklist({ token });
+      await blacklistedToken.save();
       return res.status(400).json({
         success: false,
         message: 'Insufficient Balance',
@@ -197,8 +235,14 @@ exports.withdraw = async (req, res) => {
 };
 
 exports.generateReceipt = async (req, res) => {
+  const { token } = req.body;
   try {
-    const { token } = req.body;
+    if (await isTokenBlacklisted(token)) {
+      return res.status(401).json({
+        success: false,
+        message: 'Session expired',
+      });
+    }
     if (!token) {
       return res.status(400).json({
         success: false,
@@ -243,6 +287,8 @@ exports.generateReceipt = async (req, res) => {
 
   } catch (error) {
     console.error('Error in generateReceipt:', error);
+    const blacklistedToken = new Blacklist({ token });
+    await blacklistedToken.save();
     res.status(500).json({
       success: false,
       message: 'Failed to generate receipt',

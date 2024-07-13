@@ -11,14 +11,7 @@ const AmountInput = ({ token }) => {
   const handleWithdraw = async () => {
     const baseURL = process.env.REACT_APP_API_BASE_URL || 'https://localhost:2003';
     const endpoint = '/atm/withdraw';
-    if (amount.length === 0) {
-      setAmount('');
-      setError('Please Enter the amount');
-    }
-    else if (amount >= 10000) {
-      setAmount('');
-      setError('Amount should be less than or equal to 10000');
-    }
+
     try {
       const response = await fetch(`${baseURL}${endpoint}`, {
         method: 'POST',
@@ -32,9 +25,10 @@ const AmountInput = ({ token }) => {
       if (data.success) {
         setWithdrawn(true);
       } else {
+        setAmount('');
         setError(data.message);
-        if (data.message === 'Session expired') {
-          alert('Session Expired');
+        if (data.message === 'Session expired' || data.message === 'Insufficient Balance') {
+          alert(data.message);
           navigate('/');
         }
       }

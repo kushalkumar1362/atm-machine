@@ -26,8 +26,11 @@ const PinInput = ({ token }) => {
       if (data.success) {
         navigate('/amount')
       } else {
-        alert(data.message);
-        navigate('/');
+        if (data.message === 'Session expired' || data.message === "Invalid Pin") {
+          alert(data.message);
+          navigate('/');
+        }
+        setError(data.message);
       }
       setPin('');
     } catch (error) {
