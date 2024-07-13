@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/account.model');
 const ATM = require('../models/atm.model');
 const { dispenseCash } = require('../utils/cashDispenser.utils');
+const Transaction = require('../models/transaction.model');
 require("dotenv").config();
 
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -33,6 +34,7 @@ exports.checkAccount = async (req, res) => {
       });
     }
   } catch (error) {
+    console.log(error);
     return res.status(400).json({
       success: false,
       message: error.message,
@@ -72,7 +74,7 @@ exports.checkPin = async (req, res) => {
       user.failedAttempts += 1;
       if (user.failedAttempts >= 3) {
         user.blockUntil = new Date(new Date().getTime() + 24 * 60 * 60 * 1000);
-        user.failedAttempts = 0; 
+        user.failedAttempts = 0;
       }
       await user.save();
       return res.status(400).json({
@@ -81,7 +83,7 @@ exports.checkPin = async (req, res) => {
       });
     }
 
-    user.failedAttempts = 0; // Reset failed attempts on successful login
+    user.failedAttempts = 0;
     user.blockUntil = null;
     await user.save();
 
@@ -90,6 +92,7 @@ exports.checkPin = async (req, res) => {
       token,
     });
   } catch (error) {
+    console.log(error);
     return res.status(400).json({
       success: false,
       message: error.message,
@@ -155,8 +158,19 @@ exports.withdraw = async (req, res) => {
     }
 
     user.balance -= amount;
+
+    const transaction = new Transaction({
+      accountNumber: user.accountNumber,
+      withdrawalAmount: amount,
+      notesDispensed: notesToDispense,
+    });
+    await transaction.save();
+
+    user.transactions.push(transaction._id);
     await user.save();
+
     await ATM.updateOne({}, atm);
+
 
     return res.status(200).json({
       success: true,
@@ -165,9 +179,59 @@ exports.withdraw = async (req, res) => {
       notesToDispense,
     });
   } catch (error) {
+    console.log(error);
     return res.status(400).json({
       success: false,
       message: error.message,
     });
   }
 };
+
+exports.generateReceipt = async (req, res) => {
+  try {
+    const { token } = req.body;
+    let decoded;
+    try {
+      decoded = jwt.verify(token, JWT_SECRET);
+    } catch (err) {
+      return res.status(401).json({
+        success: false,
+        message: 'Session expired',
+      });
+    }
+
+    const user = await User.findOne({ accountNumber: decoded.accountNumber }).populate('transactions');
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'user not found',
+      });
+    }
+
+    const latestTransaction = user.transactions.length > 0 ? user.transactions[user.transactions.length - 1] : null;
+
+    const receipt = {
+      accountNumber: user.accountNumber,
+      name: user.name,
+      newBalance: user.balance,
+      id: latestTransaction ? latestTransaction._id : 0,
+      withdrawalAmount: latestTransaction ? latestTransaction.withdrawalAmount : 0,
+      notes: latestTransaction ? latestTransaction.notesDispensed : 0,
+      date: latestTransaction ? latestTransaction.date : 0,
+    };
+
+    return res.status(200).json({
+      success: true,
+      receipt,
+    });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to generate receipt',
+    });
+  }
+};
+

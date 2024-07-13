@@ -4,9 +4,9 @@ dotenv.config();
 
 const User = require('./models/account.model');
 const ATM = require('./models/atm.model');
+const Transaction = require('./models/transaction.model');
 
-// Connect to the database
-mongoose.connect(process.env.MONGODB_URL, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(process.env.MONGODB_URL, {})
   .then(async () => {
     console.log('Database connected successfully');
 
@@ -32,7 +32,6 @@ mongoose.connect(process.env.MONGODB_URL, { useNewUrlParser: true, useUnifiedTop
       }
     ];
 
-    // Default ATM notes
     const atm = {
       notes: {
         10: 100,
@@ -45,15 +44,13 @@ mongoose.connect(process.env.MONGODB_URL, { useNewUrlParser: true, useUnifiedTop
       }
     };
 
-    // Clear the collections
     await User.deleteMany({});
     await ATM.deleteMany({});
+    await Transaction.deleteMany({}); // Clear transactions
 
-    // Insert default users
     await User.insertMany(users);
     console.log('Default users added successfully');
 
-    // Insert default ATM notes
     await ATM.create(atm);
     console.log('Default ATM notes added successfully');
 

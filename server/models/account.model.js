@@ -25,6 +25,10 @@ const accountSchema = new mongoose.Schema({
   blockUntil: {
     type: Date
   },
+  transactions: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Transaction",
+  }]
 });
 
 module.exports = mongoose.model('Account', accountSchema);

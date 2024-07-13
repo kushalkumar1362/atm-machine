@@ -25,7 +25,6 @@ const PinInput = ({ token }) => {
       const data = await response.json();
       if (data.success) {
         console.log(data);
-        navigate('/amount');
       } else {
         if (data.message === 'Session expired') {
           alert("Session Expired");
@@ -67,7 +66,7 @@ const PinInput = ({ token }) => {
       />
       {error && <p className="text-red-500">{error}</p>}
       <button onClick={handleNext} className="bg-blue-500 text-white py-2 px-4 rounded mt-4">
-        Next
+        Withdraw
       </button>
     </div>
   );
