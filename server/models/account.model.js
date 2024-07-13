@@ -23,12 +23,17 @@ const accountSchema = new mongoose.Schema({
     default: 0,
   },
   blockUntil: {
-    type: Date
+    type: Date,
+    default: null,
   },
   transactions: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: "Transaction",
-  }]
+  }],
+  lastFailedAttempt: {
+    type: Date,
+    default : null,
+  },
 });
 
 module.exports = mongoose.model('Account', accountSchema);

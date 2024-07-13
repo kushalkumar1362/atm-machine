@@ -12,12 +12,10 @@ const AccountInput = ({ setToken }) => {
     if (accountNumber.length === 0) {
       setAccountNumber('');
       setError('Please Enter the ATM card Number');
-      return;
     }
-    if (accountNumber.length !== 16) {
+    else if (accountNumber.length !== 16) {
       setAccountNumber('');
       setError('Please enter a 16-digit ATM card number');
-      return;
     }
     try {
       const response = await fetch(`${baseURL}${endpoint}`, {

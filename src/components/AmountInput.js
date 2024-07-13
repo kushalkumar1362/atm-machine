@@ -11,6 +11,14 @@ const AmountInput = ({ token }) => {
   const handleWithdraw = async () => {
     const baseURL = process.env.REACT_APP_API_BASE_URL || 'https://localhost:2003';
     const endpoint = '/atm/withdraw';
+    if (amount.length === 0) {
+      setAmount('');
+      setError('Please Enter the amount');
+    }
+    else if (amount >= 10000) {
+      setAmount('');
+      setError('Amount should be less than or equal to 10000');
+    }
     try {
       const response = await fetch(`${baseURL}${endpoint}`, {
         method: 'POST',

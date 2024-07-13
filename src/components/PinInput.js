@@ -26,19 +26,10 @@ const PinInput = ({ token }) => {
       if (data.success) {
         navigate('/amount')
       } else {
-        if (data.message === 'Session expired') {
-          alert("Session Expired");
-          navigate('/');
-        }
-        else if (data.message === 'Account is blocked for 24 Hours. Try again later.') {
-          alert("Account is blocked. Try again later.");
-          navigate('/');
-        }
-        else {
-          setError(data.message);
-        }
-        setPin('');
+        alert(data.message);
+        navigate('/');
       }
+      setPin('');
     } catch (error) {
       setError('Failed to connect to the server');
     }

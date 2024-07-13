@@ -31,7 +31,7 @@ exports.checkAccount = async (req, res) => {
     } else {
       res.json({
         success: false,
-        message:"Acount Does Not Exists"
+        message: "Acount Does Not Exists"
       });
     }
   } catch (error) {
@@ -69,13 +69,22 @@ exports.checkPin = async (req, res) => {
         success: false,
         message: 'Account is blocked. Try again later.',
       });
+    } else {
+      user.blockUntil = null;
+    }
+
+    if (user.lastFailedAttempt && new Date() > new Date(user.lastFailedAttempt)) {
+      user.failedAttempts = 0;
+      user.lastFailedAttempt = null;
     }
 
     if (user.pin !== pin) {
       user.failedAttempts += 1;
+      if (!user.lastFailedAttempt) {
+        user.lastFailedAttempt = new Date(new Date().getTime() + 24 * 60 * 60 * 1000);
+      }
       if (user.failedAttempts >= 3) {
         user.blockUntil = new Date(new Date().getTime() + 24 * 60 * 60 * 1000);
-        user.failedAttempts = 0;
       }
       await user.save();
       return res.status(400).json({
