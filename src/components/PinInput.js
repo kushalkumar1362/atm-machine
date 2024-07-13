@@ -24,7 +24,7 @@ const PinInput = ({ token }) => {
       });
       const data = await response.json();
       if (data.success) {
-        console.log(data);
+        navigate('/amount')
       } else {
         if (data.message === 'Session expired') {
           alert("Session Expired");
@@ -46,13 +46,14 @@ const PinInput = ({ token }) => {
 
   const handleInputChange = (e) => {
     const value = e.target.value;
-    if (/^\d*$/.test(value)) {
+    if (/^\d*$/.test(value) && value.length <= 4) {
       setPin(value);
       setError('');
     } else {
-      setError('Only numbers are allowed.');
+      setError('PIN should be numeric and no more than 4 digits.');
     }
   };
+
 
   return (
     <div className="flex flex-col items-center justify-center">

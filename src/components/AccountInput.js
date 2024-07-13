@@ -26,7 +26,6 @@ const AccountInput = ({ setToken }) => {
       const data = await response.json();
       if (data.success) {
         setToken(data.token);
-        console.log(data);
         navigate('/pin');
       } else {
         setToken(null);

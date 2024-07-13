@@ -171,7 +171,6 @@ exports.withdraw = async (req, res) => {
 
     await ATM.updateOne({}, atm);
 
-
     return res.status(200).json({
       success: true,
       message: 'Cash Withdrawal successful',
@@ -190,6 +189,13 @@ exports.withdraw = async (req, res) => {
 exports.generateReceipt = async (req, res) => {
   try {
     const { token } = req.body;
+    if (!token) {
+      return res.status(400).json({
+        success: false,
+        message: 'Token not provided',
+      });
+    }
+
     let decoded;
     try {
       decoded = jwt.verify(token, JWT_SECRET);
@@ -205,7 +211,7 @@ exports.generateReceipt = async (req, res) => {
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: 'user not found',
+        message: 'User not found',
       });
     }
 
@@ -213,22 +219,21 @@ exports.generateReceipt = async (req, res) => {
 
     const receipt = {
       accountNumber: user.accountNumber,
-      name: user.name,
       newBalance: user.balance,
-      id: latestTransaction ? latestTransaction._id : 0,
+      transactionId: latestTransaction ? latestTransaction._id : 0,
       withdrawalAmount: latestTransaction ? latestTransaction.withdrawalAmount : 0,
       notes: latestTransaction ? latestTransaction.notesDispensed : 0,
-      date: latestTransaction ? latestTransaction.date : 0,
+      transactionDate: latestTransaction ? latestTransaction.date : 0,
     };
 
-    return res.status(200).json({
+    res.status(200).json({
       success: true,
       receipt,
     });
 
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({
+    console.error('Error in generateReceipt:', error);
+    res.status(500).json({
       success: false,
       message: 'Failed to generate receipt',
     });

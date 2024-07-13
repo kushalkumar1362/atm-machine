@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes} from 'react-router-dom';
 import AccountInput from './components/AccountInput';
 import PinInput from './components/PinInput';
 import AmountInput from './components/AmountInput';
+import Receipt from './components/Receipt';
 
 const App = () => {
   const [token, setToken] = useState('');
@@ -14,6 +15,7 @@ const App = () => {
         <Route path="/" element={<AccountInput setToken={setToken} />} />
         <Route path="/pin" element={<PinInput token={token} />} />
         <Route path="/amount" element={<AmountInput token={token} />} />
+        <Route path="/receipt" element={<Receipt token={token} />} />
       </Routes>
     </div>
   );
