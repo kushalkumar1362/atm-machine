@@ -14,22 +14,16 @@ mongoose.connect(process.env.MONGODB_URL, {})
     const users = [
       {
         name: 'John Doe',
-        accountNumber: '12345671',
+        accountNumber: '1111111111111111',
         balance: 50000,
         pin: '1234'
       },
       {
         name: 'Jane Smith',
-        accountNumber: '12345672',
+        accountNumber: '2222222222222222',
         balance: 10000,
-        pin: '5678'
-      },
-      {
-        name: 'Alice Johnson',
-        accountNumber: '12345673',
-        balance: 7000,
         pin: '4321'
-      }
+      },
     ];
 
     const atm = {

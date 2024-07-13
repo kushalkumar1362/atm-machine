@@ -54,20 +54,26 @@ const PinInput = ({ token }) => {
     }
   };
 
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleNext();
+    }
+  };
 
   return (
-    <div className="flex flex-col items-center justify-center">
+    <div className="flex flex-col items-center justify-center" onKeyDown={handleKeyPress}>
       <h2 className="text-2xl mb-4">Enter PIN</h2>
       <input
         type="password"
-        className="border p-2"
+        className="border-2 border-gray-500 p-2 focus:outline-none focus:border-teal-500 rounded-lg"
         placeholder="PIN"
         value={pin}
         onChange={handleInputChange}
+        autoFocus
       />
       {error && <p className="text-red-500">{error}</p>}
       <button onClick={handleNext} className="bg-blue-500 text-white py-2 px-4 rounded mt-4">
-        Withdraw
+        Next
       </button>
     </div>
   );

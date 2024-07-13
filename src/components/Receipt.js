@@ -13,6 +13,12 @@ const Receipt = ({ token }) => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
+  const maskAccountNumber = (accountNumber) => {
+    const last4Digits = accountNumber.slice(-4);
+    const maskedAccountNumber = '************' + last4Digits;
+    return maskedAccountNumber;
+  };
+
   const handleGetReceipt = useCallback(async () => {
     const baseURL = process.env.REACT_APP_API_BASE_URL || 'https://localhost:2003';
     const endpoint = '/atm/receipt';
@@ -30,7 +36,7 @@ const Receipt = ({ token }) => {
       if (data.success) {
         const { receipt } = data;
         setReceiptData({
-          accountNumber: receipt.accountNumber,
+          accountNumber: maskAccountNumber(receipt.accountNumber),
           newBalance: receipt.newBalance,
           transactionId: receipt.transactionId,
           amount: receipt.withdrawalAmount,
@@ -58,8 +64,8 @@ const Receipt = ({ token }) => {
   return (
     <div className='flex flex-col items-center justify-center'>
       {error && <p className="text-red-500 mb-4">{error}</p>}
-      <div className="grid grid-cols-2 gap-2">
-        <div className="mb-1 font-bold">Account Number:</div>
+      <div className="grid grid-cols-2 gap-2" >
+        <div className="mb-1 font-bold">Card Number:</div>
         <div className="mb-1">{accountNumber}</div>
 
         <div className="mb-1 font-bold">Transaction ID:</div>

@@ -31,6 +31,7 @@ exports.checkAccount = async (req, res) => {
     } else {
       res.json({
         success: false,
+        message:"Acount Does Not Exists"
       });
     }
   } catch (error) {

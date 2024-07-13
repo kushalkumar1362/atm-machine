@@ -35,21 +35,28 @@ const AmountInput = ({ token }) => {
     }
   };
 
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleWithdraw();
+    }
+  };
+
   return (
     <div>
       {
         !withdrawn &&
-        <div className="flex flex-col items-center justify-center">
+        <div className="flex flex-col items-center justify-center" onKeyDown={handleKeyPress}>
           <h2 className="text-2xl mb-4">Enter Amount and Denomination</h2>
           <input
             type="number"
-            className="border p-2 mb-4"
+            className="border-2 border-gray-500 p-2 focus:outline-none focus:border-teal-500 rounded-lg mb-8"
             placeholder="Amount"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
+            autoFocus
           />
           <select
-            className="border p-2 mb-4"
+            className="border-2 border-gray-500 px-[12px] py-2 focus:outline-none focus:border-teal-500 rounded-lg mb-4"
             value={denomination}
             onChange={(e) => setDenomination(e.target.value)}
           >
