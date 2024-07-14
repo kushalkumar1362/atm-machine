@@ -10,19 +10,20 @@ const Receipt = ({ token }) => {
     notesToDispense: {},
     transactionDate: ''
   });
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const maskAccountNumber = (accountNumber) => {
     const last4Digits = accountNumber.slice(-4);
-    const maskedAccountNumber = '************' + last4Digits;
-    return maskedAccountNumber;
+    return '************' + last4Digits;
   };
 
   const handleGetReceipt = useCallback(async () => {
     const baseURL = process.env.REACT_APP_API_BASE_URL || 'https://localhost:2003';
     const endpoint = '/atm/receipt';
     try {
+      setLoading(true);
       const response = await fetch(`${baseURL}${endpoint}`, {
         method: 'POST',
         headers: {
@@ -52,12 +53,18 @@ const Receipt = ({ token }) => {
       }
     } catch (error) {
       setError('Failed to connect to the server');
+    } finally {
+      setLoading(false);
     }
   }, [token, navigate]);
 
   useEffect(() => {
     handleGetReceipt();
   }, [handleGetReceipt]);
+
+  if (loading) {
+    return <p className='text-center'>Loading receipt...</p>;
+  }
 
   const { accountNumber, newBalance, transactionId, amount, notesToDispense, transactionDate } = receiptData;
 
@@ -70,19 +77,19 @@ const Receipt = ({ token }) => {
 
         <div className="mb-1 font-bold">Transaction ID:</div>
         <div className="mb-1">{transactionId}</div>
-        
+
         <div className="mb-1 font-bold">Amount:</div>
         <div className="mb-1">{amount}</div>
-        
+
         <div className="mb-1 font-bold">Date:</div>
         <div className="mb-1">{new Date(transactionDate).toLocaleString()}</div>
-        
+
         <div className="mb-1 font-bold">New Balance:</div>
         <div className="mb-1">{newBalance}</div>
-        
+
         <div className="mb-1 font-bold">Notes Dispensed:</div>
         <div className="mb-1">
-        
+
           <ul className="list-none">
             {Object.entries(notesToDispense).map(([note, count]) => (
               <li key={note}>{note}: {count}</li>

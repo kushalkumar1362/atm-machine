@@ -7,13 +7,15 @@ const AmountInput = ({ token }) => {
   const [denomination, setDenomination] = useState('');
   const [error, setError] = useState('');
   const [withdrawn, setWithdrawn] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
-  const handleWithdraw = async () => {
-    const baseURL = process.env.REACT_APP_API_BASE_URL || 'https://localhost:2003';
-    const endpoint = '/atm/withdraw';
+  const baseURL = process.env.REACT_APP_API_BASE_URL || 'https://localhost:2003';
+  const endpoint = '/atm/withdraw';
 
+  const handleWithdraw = async () => {
     try {
+      setLoading(true);
       const response = await fetch(`${baseURL}${endpoint}`, {
         method: 'POST',
         headers: {
@@ -28,6 +30,7 @@ const AmountInput = ({ token }) => {
         setWithdrawn(true);
       } else {
         setAmount('');
+        setDenomination('');
         setError(data.message);
         if (data.message === 'Session expired' || data.message === 'Insufficient Balance') {
           alert(data.message);
@@ -36,6 +39,8 @@ const AmountInput = ({ token }) => {
       }
     } catch (error) {
       setError('Failed to connect to the server');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -48,10 +53,14 @@ const AmountInput = ({ token }) => {
     }
   };
 
+  const handleInputChange = (setter) => (e) => {
+    setter(e.target.value);
+    setError('');
+  };
+
   return (
     <div>
-      {
-        !withdrawn &&
+      {!withdrawn ? (
         <div className="flex flex-col items-center justify-center" onKeyDown={handleKeyPress}>
           <h2 className="text-2xl mb-4">Enter Amount and Denomination</h2>
           <input
@@ -59,14 +68,16 @@ const AmountInput = ({ token }) => {
             className="border-2 border-gray-500 p-2 focus:outline-none focus:border-teal-500 rounded-lg mb-8"
             placeholder="Amount"
             value={amount}
-            onChange={(e) => setAmount(e.target.value)}
+            onChange={handleInputChange(setAmount)}
             min={10}
             autoFocus
+            disabled={loading}
           />
           <select
             className="border-2 border-gray-500 px-[12px] py-2 focus:outline-none focus:border-teal-500 rounded-lg mb-4"
             value={denomination}
-            onChange={(e) => setDenomination(e.target.value)}
+            onChange={handleInputChange(setDenomination)}
+            disabled={loading}
           >
             <option value="" disabled>Select Denomination</option>
             <option value="10">10</option>
@@ -78,14 +89,11 @@ const AmountInput = ({ token }) => {
             <option value="1000">1000</option>
           </select>
           {error && <p className="text-red-500 mb-4">{error}</p>}
-          <button onClick={handleWithdraw} className="bg-blue-500 text-white py-2 px-4 rounded">
-            Withdraw
+          <button onClick={handleWithdraw} className="bg-blue-500 text-white py-2 px-4 rounded" disabled={loading}>
+            {loading ? 'Processing...' : 'Withdraw'}
           </button>
         </div>
-      }
-
-      {
-        withdrawn &&
+      ) : (
         <div className="flex gap-20 items-center justify-center">
           <NavLink to={'/receipt'}>
             <div className="bg-blue-500 text-white py-2 px-4 rounded mt-4">
@@ -93,7 +101,7 @@ const AmountInput = ({ token }) => {
             </div>
           </NavLink>
         </div>
-      }
+      )}
     </div>
   );
 };

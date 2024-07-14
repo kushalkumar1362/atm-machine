@@ -5,9 +5,10 @@ const CancelSession = ({ token, onSessionExpired }) => {
   const navigate = useNavigate();
 
   const handleCancel = async () => {
+    const baseURL = process.env.REACT_APP_API_BASE_URL || 'https://localhost:2003';
+    const endpoint = '/atm/invalidate-session';
+    
     try {
-      const baseURL = process.env.REACT_APP_API_BASE_URL || 'https://localhost:2003';
-      const endpoint = '/atm/invalidate-session';
       const response = await fetch(`${baseURL}${endpoint}`, {
         method: 'POST',
         headers: {

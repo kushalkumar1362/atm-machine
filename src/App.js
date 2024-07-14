@@ -6,7 +6,8 @@ import AmountInput from './components/AmountInput';
 import Receipt from './components/Receipt';
 import TokenCountdown from './components/TokenCountdown';
 import CancelSession from './components/CancelSession';
-import {jwtDecode} from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
+import ProtectedRoute from './components/ProtectedRoute';
 
 const App = () => {
   const [token, setToken] = useState('');
@@ -41,9 +42,30 @@ const App = () => {
       <h1 className='bg-gradient-01 bg-clip-text text-transparent text-4xl font-bold mb-10'>ATM Cash Withdrawal</h1>
       <Routes>
         <Route path="/" element={<AccountInput setToken={handleLogin} />} />
-        <Route path="/pin" element={<PinInput token={token} />} />
-        <Route path="/amount" element={<AmountInput token={token} />} />
-        <Route path="/receipt" element={<Receipt token={token} />} />
+        <Route
+          path="/pin"
+          element={
+            <ProtectedRoute token={token}>
+              <PinInput token={token} />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/amount"
+          element={
+            <ProtectedRoute token={token}>
+              <AmountInput token={token} />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/receipt"
+          element={
+            <ProtectedRoute token={token}>
+              <Receipt token={token} />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
       {location.pathname !== '/' && location.pathname !== '/receipt' && (
         <div className="absolute top-4 right-4">

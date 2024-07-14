@@ -5,17 +5,20 @@ import { toast } from "react-hot-toast";
 const PinInput = ({ token }) => {
   const [pin, setPin] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  const baseURL = process.env.REACT_APP_API_BASE_URL || 'https://localhost:2003';
+  const endpoint = '/atm/check-pin';
+
   const handleNext = async () => {
-    const baseURL = process.env.REACT_APP_API_BASE_URL || 'https://localhost:2003';
-    const endpoint = '/atm/check-pin';
+    if (pin.length === 0) {
+      setPin('');
+      setError('Please Enter the Pin');
+      return;
+    }
     try {
-      if (pin.length === 0) {
-        setPin('');
-        setError('Please Enter the Pin');
-        return;
-      }
+      setLoading(true);
       const response = await fetch(`${baseURL}${endpoint}`, {
         method: 'POST',
         headers: {
@@ -37,6 +40,8 @@ const PinInput = ({ token }) => {
       setPin('');
     } catch (error) {
       setError('Failed to connect to the server');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -73,10 +78,15 @@ const PinInput = ({ token }) => {
         value={pin}
         onChange={handleInputChange}
         autoFocus
+        disabled={loading}
       />
       {error && <p className="text-red-500">{error}</p>}
-      <button onClick={handleNext} className="bg-blue-500 text-white py-2 px-4 rounded mt-4">
-        Next
+      <button
+        onClick={handleNext}
+        className="bg-blue-500 text-white py-2 px-4 rounded mt-4"
+        disabled={loading}
+      >
+        {loading ? 'Processing...' : 'Next'}
       </button>
     </div>
   );

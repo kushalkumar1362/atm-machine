@@ -1,26 +1,26 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from "react-hot-toast";
+import { toast } from 'react-hot-toast';
 
 const AccountInput = ({ setToken }) => {
   const [accountNumber, setAccountNumber] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  const baseURL = process.env.REACT_APP_API_BASE_URL || 'https://localhost:2003';
+  const endpoint = '/atm/check-account';
+
   const handleNext = async () => {
-    const baseURL = process.env.REACT_APP_API_BASE_URL || 'https://localhost:2003';
-    const endpoint = '/atm/check-account';
-    if (accountNumber.length === 0) {
-      setAccountNumber('');
-      setError('Please Enter the ATM card Number');
-      return;
+    if (!accountNumber) {
+      return setError('Please Enter the ATM card Number');
     }
-    else if (accountNumber.length !== 16) {
-      setAccountNumber('');
-      setError('Please enter a 16-digit ATM card number');
-      return;
+    if (accountNumber.length !== 16) {
+      return setError('Please enter a 16-digit ATM card number');
     }
+
     try {
+      setLoading(true);
       const response = await fetch(`${baseURL}${endpoint}`, {
         method: 'POST',
         headers: {
@@ -28,25 +28,26 @@ const AccountInput = ({ setToken }) => {
         },
         body: JSON.stringify({ accountNumber }),
       });
-
       const data = await response.json();
+
       if (data.success) {
         toast.success(data.message);
         setToken(data.token);
         navigate('/pin');
       } else {
         setToken(null);
-        setAccountNumber('');
         setError(data.message);
       }
-    } catch (error) {
+    } catch {
       setError('Failed to connect to the server');
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleInputChange = (e) => {
     const value = e.target.value;
-    if (/^\d*$/.test(value) && value.length <= 16) {
+    if (/^\d{0,16}$/.test(value)) {
       setAccountNumber(value);
       setError('');
     } else {
@@ -57,8 +58,7 @@ const AccountInput = ({ setToken }) => {
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
       handleNext();
-    }
-    else if (e.key === 'Tab') {
+    } else if (e.key === 'Tab') {
       e.preventDefault();
     }
   };
@@ -73,12 +73,15 @@ const AccountInput = ({ setToken }) => {
         value={accountNumber}
         onChange={handleInputChange}
         autoFocus
+        disabled={loading}
       />
       {error && <p className="text-red-500">{error}</p>}
       <button
         onClick={handleNext}
-        className="bg-blue-500 text-white py-2 px-4 rounded mt-4">
-        Next
+        className="bg-blue-500 text-white py-2 px-4 rounded mt-4"
+        disabled={loading}
+      >
+        {loading ? 'Processing...' : 'Next'}
       </button>
     </div>
   );
