@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {jwtDecode} from 'jwt-decode';
 
-const TokenCountdown = ({ token }) => {
+const TokenCountdown = ({ token, sessionExpired }) => {
   const [timeLeft, setTimeLeft] = useState(() => {
     const decodedToken = jwtDecode(token);
     const exp = decodedToken.exp * 1000; 
@@ -33,7 +33,7 @@ const TokenCountdown = ({ token }) => {
 
   return (
     <div className="text-center">
-      {timeLeft > 1
+      {timeLeft > 1 && !sessionExpired
         ? <h1 className="text-2xl font-bold text-gray-800">
           Session expires in {timeLeft} {timeLeft === 1 ? 'second' : 'seconds'}
         </h1>

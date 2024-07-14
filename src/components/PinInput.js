@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from "react-hot-toast";
 
 const PinInput = ({ token }) => {
   const [pin, setPin] = useState('');
@@ -24,6 +25,7 @@ const PinInput = ({ token }) => {
       });
       const data = await response.json();
       if (data.success) {
+        toast.success(data.message);
         navigate('/amount', { replace: true });
       } else {
         if (data.message === 'Session expired' || data.message === "Invalid Pin") {

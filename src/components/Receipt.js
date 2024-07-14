@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const Receipt = ({ token }) => {
   const [receiptData, setReceiptData] = useState({
@@ -90,13 +90,6 @@ const Receipt = ({ token }) => {
           </ul>
         </div>
       </div>
-      
-      <NavLink to={'/'}>
-        <div className="bg-blue-500 text-white py-2 px-4 rounded mt-10">
-          Back to Home
-        </div>
-      </NavLink>
-
     </div>
   );
 };

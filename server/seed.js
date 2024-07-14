@@ -13,15 +13,15 @@ mongoose.connect(process.env.MONGODB_URL, {})
     // Default accounts
     const users = [
       {
-        name: 'John Doe',
+        name: 'Kushal kumar',
         accountNumber: '1111111111111111',
-        balance: 1000,
+        balance: 100000,
         pin: '1111'
       },
       {
-        name: 'Jane Smith',
+        name: 'Jatin',
         accountNumber: '2222222222222222',
-        balance: 2000,
+        balance: 10000,
         pin: '2222'
       },
       {
@@ -29,6 +29,12 @@ mongoose.connect(process.env.MONGODB_URL, {})
         accountNumber: '3333333333333333',
         balance: 20000,
         pin: '3333'
+      },
+      {
+        name: 'John Doe',
+        accountNumber: '4444444444444444',
+        balance: 15000,
+        pin: '4444'
       },
     ];
 

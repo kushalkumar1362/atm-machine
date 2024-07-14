@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
+import { toast } from "react-hot-toast";
 
 const AmountInput = ({ token }) => {
   const [amount, setAmount] = useState('');
@@ -23,6 +24,7 @@ const AmountInput = ({ token }) => {
 
       const data = await response.json();
       if (data.success) {
+        toast.success(data.message);
         setWithdrawn(true);
       } else {
         setAmount('');
@@ -55,6 +57,7 @@ const AmountInput = ({ token }) => {
             placeholder="Amount"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
+            min={10}
             autoFocus
           />
           <select
@@ -84,12 +87,6 @@ const AmountInput = ({ token }) => {
           <NavLink to={'/receipt'}>
             <div className="bg-blue-500 text-white py-2 px-4 rounded mt-4">
               Get Receipt
-            </div>
-          </NavLink>
-
-          <NavLink to={'/'}>
-            <div className="bg-blue-500 text-white py-2 px-4 rounded mt-4">
-              Back to Home
             </div>
           </NavLink>
         </div>

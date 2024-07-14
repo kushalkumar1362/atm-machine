@@ -18,6 +18,26 @@ const isTokenBlacklisted = async (token) => {
   return !!blacklistedToken;
 };
 
+exports.invalidateSession = async (req, res) => {
+  const { token } = req.body;
+
+  try {
+
+    const isBlacklisted = await isTokenBlacklisted(token);
+    if (isBlacklisted) {
+      return res.status(401).json({ success: false, message: 'Session already expired' });
+    }
+
+    const blacklistedToken = new Blacklist({ token });
+    await blacklistedToken.save();
+
+    res.json({ success: true, message: 'Session Expired' });
+  } catch (error) {
+    console.error('Error invalidating session:', error);
+    return res.status(500).json({ success: false, message: 'Failed to invalidate session' });
+  }
+};
+
 exports.checkAccount = async (req, res) => {
   try {
     const { accountNumber } = req.body;
@@ -32,6 +52,7 @@ exports.checkAccount = async (req, res) => {
       const token = jwt.sign({ accountNumber }, JWT_SECRET, { expiresIn: JWT_EXPIRATION });
       res.json({
         success: true,
+        message:"Card Successfully Verified",
         token,
       });
     } else {
@@ -107,7 +128,7 @@ exports.checkPin = async (req, res) => {
         message: 'Invalid Pin',
       });
     }
-
+    user.failedAttempts = 0;
     user.blockUntil = null;
     await user.save();
 
@@ -153,6 +174,12 @@ exports.withdraw = async (req, res) => {
         message: 'Please Enter the amount',
       });
     }
+    if (amount < 10) {
+      return res.status(401).json({
+        success: false,
+        message: 'Minimum withdrawal Amount is 10',
+      });
+    }
 
     if (amount < denominationNumber) {
       return res.status(401).json({
@@ -161,7 +188,7 @@ exports.withdraw = async (req, res) => {
       });
     }
 
-    if (amount >= 10000) {
+    if (amount > 10000) {
       return res.status(401).json({
         success: false,
         message: 'Amount should be less than or equal to 10000',

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from "react-hot-toast";
 
 const AccountInput = ({ setToken }) => {
   const [accountNumber, setAccountNumber] = useState('');
@@ -30,6 +31,7 @@ const AccountInput = ({ setToken }) => {
 
       const data = await response.json();
       if (data.success) {
+        toast.success(data.message);
         setToken(data.token);
         navigate('/pin');
       } else {
