@@ -1,9 +1,9 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/account.model');
 const ATM = require('../models/atm.model');
-const { dispenseCash } = require('../utils/cashDispenser.utils');
 const Transaction = require('../models/transaction.model');
 const Blacklist = require('../models/blockToken.model');
+const { dispenseCash } = require('../utils/cashDispenser.utils');
 require("dotenv").config();
 
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -18,14 +18,16 @@ const isTokenBlacklisted = async (token) => {
   return !!blacklistedToken;
 };
 
+const handleSessionExpired = (res) => {
+  return res.status(401).json({ success: false, message: 'Session expired' });
+};
+
 exports.invalidateSession = async (req, res) => {
   const { token } = req.body;
 
   try {
-
-    const isBlacklisted = await isTokenBlacklisted(token);
-    if (isBlacklisted) {
-      return res.status(401).json({ success: false, message: 'Session already expired' });
+    if (await isTokenBlacklisted(token)) {
+      return handleSessionExpired(res);
     }
 
     const blacklistedToken = new Blacklist({ token });
@@ -42,27 +44,29 @@ exports.checkAccount = async (req, res) => {
   try {
     const { accountNumber } = req.body;
     const user = await User.findOne({ accountNumber });
-    if (user) {
-      if (isAccountBlocked(user)) {
-        return res.status(403).json({
-          success: false,
-          message: 'Account is blocked. Try again later.',
-        });
-      }
-      const token = jwt.sign({ accountNumber }, JWT_SECRET, { expiresIn: JWT_EXPIRATION });
-      res.json({
-        success: true,
-        message:"Card Successfully Verified",
-        token,
-      });
-    } else {
-      res.json({
+
+    if (!user) {
+      return res.json({
         success: false,
-        message: "Acount Does Not Exists"
+        message: "Account Does Not Exist"
       });
     }
+
+    if (isAccountBlocked(user)) {
+      return res.status(403).json({
+        success: false,
+        message: 'Account is blocked. Try again later.',
+      });
+    }
+
+    const token = jwt.sign({ accountNumber }, JWT_SECRET, { expiresIn: JWT_EXPIRATION });
+    res.json({
+      success: true,
+      message: "Card Successfully Verified",
+      token,
+    });
   } catch (error) {
-    console.log(error);
+    console.error('Error checking account:', error);
     return res.status(400).json({
       success: false,
       message: error.message,
@@ -74,19 +78,14 @@ exports.checkPin = async (req, res) => {
   const { token, pin } = req.body;
   try {
     if (await isTokenBlacklisted(token)) {
-      return res.status(401).json({
-        success: false,
-        message: 'Session expired',
-      });
+      return handleSessionExpired(res);
     }
+
     let decoded;
     try {
       decoded = jwt.verify(token, JWT_SECRET);
     } catch (err) {
-      return res.status(401).json({
-        success: false,
-        message: 'Session expired',
-      });
+      return handleSessionExpired(res);
     }
 
     const user = await User.findOne({ accountNumber: decoded.accountNumber });
@@ -134,11 +133,11 @@ exports.checkPin = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message:"Pin verified Successfullly",
+      message: "Pin verified successfully",
       token,
     });
   } catch (error) {
-    console.log(error);
+    console.error('Error checking pin:', error);
     const blacklistedToken = new Blacklist({ token });
     await blacklistedToken.save();
     return res.status(400).json({
@@ -152,32 +151,29 @@ exports.withdraw = async (req, res) => {
   try {
     const { token, amount, denomination } = req.body;
     const denominationNumber = parseInt(denomination, 10);
+
     if (await isTokenBlacklisted(token)) {
-      return res.status(401).json({
-        success: false,
-        message: 'Session expired',
-      });
+      return handleSessionExpired(res);
     }
+
     let decoded;
     try {
       decoded = jwt.verify(token, JWT_SECRET);
     } catch (err) {
+      return handleSessionExpired(res);
+    }
+
+    if (!amount) {
       return res.status(401).json({
         success: false,
-        message: 'Session expired'
+        message: 'Please enter the amount',
       });
     }
 
-    if (amount.length === 0) {
-      return res.status(401).json({
-        success: false,
-        message: 'Please Enter the amount',
-      });
-    }
     if (amount < 10) {
       return res.status(401).json({
         success: false,
-        message: 'Minimum withdrawal Amount is 10',
+        message: 'Minimum withdrawal amount is 10',
       });
     }
 
@@ -209,7 +205,7 @@ exports.withdraw = async (req, res) => {
     if (atm.notes[denomination] === 0) {
       return res.status(503).json({
         success: false,
-        message: 'Cannot dispense the requested amount with the available denominations please check another denomination',
+        message: 'Cannot dispense the requested amount with the available denominations. Please try another denomination.',
       });
     }
 
@@ -225,10 +221,11 @@ exports.withdraw = async (req, res) => {
     for (const note in notesToDispense) {
       totalNotes += notesToDispense[note];
     }
+
     if (totalNotes > 20) {
       return res.status(200).json({
         success: false,
-        message: 'Total Notes Limit exceeded, only 20 notes can be withdrawn at a time',
+        message: 'Total notes limit exceeded. Only 20 notes can be withdrawn at a time',
       });
     }
 
@@ -248,12 +245,12 @@ exports.withdraw = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: 'Cash Withdrawal successful',
+      message: 'Cash withdrawal successful',
       newBalance: user.balance,
       notesToDispense,
     });
   } catch (error) {
-    console.log(error);
+    console.error('Error withdrawing cash:', error);
     return res.status(400).json({
       success: false,
       message: error.message,
@@ -265,10 +262,7 @@ exports.generateReceipt = async (req, res) => {
   const { token } = req.body;
   try {
     if (await isTokenBlacklisted(token)) {
-      return res.status(401).json({
-        success: false,
-        message: 'Session expired',
-      });
+      return handleSessionExpired(res);
     }
     if (!token) {
       return res.status(400).json({
@@ -281,10 +275,7 @@ exports.generateReceipt = async (req, res) => {
     try {
       decoded = jwt.verify(token, JWT_SECRET);
     } catch (err) {
-      return res.status(401).json({
-        success: false,
-        message: 'Session expired',
-      });
+      return handleSessionExpired(res);
     }
 
     const user = await User.findOne({ accountNumber: decoded.accountNumber }).populate('transactions');
@@ -313,7 +304,7 @@ exports.generateReceipt = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error in generateReceipt:', error);
+    console.error('Error generating receipt:', error);
     const blacklistedToken = new Blacklist({ token });
     await blacklistedToken.save();
     res.status(500).json({
@@ -322,4 +313,3 @@ exports.generateReceipt = async (req, res) => {
     });
   }
 };
-

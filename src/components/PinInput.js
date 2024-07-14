@@ -58,6 +58,9 @@ const PinInput = ({ token }) => {
     if (e.key === 'Enter') {
       handleNext();
     }
+    else if (e.key === 'Tab') {
+      e.preventDefault();
+    }
   };
 
   return (

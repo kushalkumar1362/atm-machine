@@ -43,6 +43,9 @@ const AmountInput = ({ token }) => {
     if (e.key === 'Enter') {
       handleWithdraw();
     }
+    else if (e.key === 'Tab') {
+      e.preventDefault();
+    }
   };
 
   return (

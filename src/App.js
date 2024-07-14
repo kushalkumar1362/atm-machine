@@ -1,26 +1,39 @@
-import React, { useState } from 'react';
-import { Route, Routes, useLocation } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import AccountInput from './components/AccountInput';
 import PinInput from './components/PinInput';
 import AmountInput from './components/AmountInput';
 import Receipt from './components/Receipt';
 import TokenCountdown from './components/TokenCountdown';
 import CancelSession from './components/CancelSession';
+import {jwtDecode} from 'jwt-decode';
 
 const App = () => {
   const [token, setToken] = useState('');
   const [sessionExpired, setSessionExpired] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
-  const initialTime = 120;
+  useEffect(() => {
+    if (token) {
+      try {
+        jwtDecode(token);
+      } catch (error) {
+        console.error('Invalid token format', error);
+        setSessionExpired(true);
+        navigate('/');
+      }
+    }
+  }, [token, navigate]);
 
   const handleSessionExpired = () => {
-    setSessionExpired(!sessionExpired);
+    setSessionExpired(true);
+    navigate('/');
   };
 
   const handleLogin = (newToken) => {
     setToken(newToken);
-    setSessionExpired(false); 
+    setSessionExpired(false);
   };
 
   return (
@@ -34,7 +47,7 @@ const App = () => {
       </Routes>
       {location.pathname !== '/' && location.pathname !== '/receipt' && (
         <div className="absolute top-4 right-4">
-          <TokenCountdown initialTime={initialTime} token={token} sessionExpired={sessionExpired} />
+          <TokenCountdown token={token} sessionExpired={sessionExpired} onSessionExpired={handleSessionExpired} />
         </div>
       )}
       {location.pathname !== '/' && (
