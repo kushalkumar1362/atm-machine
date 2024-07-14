@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const PinInput = ({ token }) => {
@@ -24,7 +24,7 @@ const PinInput = ({ token }) => {
       });
       const data = await response.json();
       if (data.success) {
-        navigate('/amount')
+        navigate('/amount', { replace: true });
       } else {
         if (data.message === 'Session expired' || data.message === "Invalid Pin") {
           alert(data.message);
@@ -37,6 +37,10 @@ const PinInput = ({ token }) => {
       setError('Failed to connect to the server');
     }
   };
+
+  useEffect(() => {
+    navigate(window.location.pathname, { replace: true });
+  }, [navigate]);
 
   const handleInputChange = (e) => {
     const value = e.target.value;
