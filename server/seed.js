@@ -50,16 +50,19 @@ mongoose.connect(process.env.MONGODB_URL, {})
       }
     };
 
+    // Clear existing data
     await User.deleteMany({});
     await ATM.deleteMany({});
     await Transaction.deleteMany({}); // Clear transactions
 
+    // Insert default data
     await User.insertMany(users);
     console.log('Default users added successfully');
 
     await ATM.create(atm);
     console.log('Default ATM notes added successfully');
 
+    // Disconnect from the database
     mongoose.disconnect();
   })
   .catch((error) => {
