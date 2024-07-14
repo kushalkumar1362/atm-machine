@@ -18,8 +18,10 @@ const App = () => {
   useEffect(() => {
     if (token) {
       try {
+        // Validate the token format
         jwtDecode(token);
       } catch (error) {
+        // If token is invalid, mark session as expired and navigate to the start page
         console.error('Invalid token format', error);
         setSessionExpired(true);
         navigate('/');
@@ -28,11 +30,13 @@ const App = () => {
   }, [token, navigate]);
 
   const handleSessionExpired = () => {
+    // Set session as expired and navigate to the start page
     setSessionExpired(true);
     navigate('/');
   };
 
   const handleLogin = (newToken) => {
+    // Set new token and reset session expiration status
     setToken(newToken);
     setSessionExpired(false);
   };

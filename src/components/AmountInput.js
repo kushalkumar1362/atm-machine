@@ -15,7 +15,7 @@ const AmountInput = ({ token }) => {
 
   const handleWithdraw = async () => {
     try {
-      setLoading(true);
+      setLoading(true); // Set loading state while processing
       const response = await fetch(`${baseURL}${endpoint}`, {
         method: 'POST',
         headers: {
@@ -25,31 +25,31 @@ const AmountInput = ({ token }) => {
       });
 
       const data = await response.json();
+
       if (data.success) {
-        toast.success(data.message);
-        setWithdrawn(true);
+        toast.success(data.message); // Show success message
+        setWithdrawn(true); // Set withdrawn state to true
       } else {
         setAmount('');
         setDenomination('');
-        setError(data.message);
+        setError(data.message); // Show error message from server
         if (data.message === 'Session expired' || data.message === 'Insufficient Balance') {
-          alert(data.message);
-          navigate('/');
+          alert(data.message); // Alert user if session expired or balance is insufficient
+          navigate('/'); // Redirect to the start page
         }
       }
     } catch (error) {
-      setError('Failed to connect to the server');
+      setError('Failed to connect to the server'); // Handle connection errors
     } finally {
-      setLoading(false);
+      setLoading(false); // Reset loading state
     }
   };
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
-      handleWithdraw();
-    }
-    else if (e.key === 'Tab') {
-      e.preventDefault();
+      handleWithdraw(); // Handle Enter key to submit form
+    } else if (e.key === 'Tab') {
+      e.preventDefault(); // Prevent Tab key to control focus manually
     }
   };
 

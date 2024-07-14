@@ -14,16 +14,18 @@ const Receipt = ({ token }) => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
+  // Function to mask account number for privacy
   const maskAccountNumber = (accountNumber) => {
     const last4Digits = accountNumber.slice(-4);
     return '************' + last4Digits;
   };
 
+  // Function to fetch receipt data from the server
   const handleGetReceipt = useCallback(async () => {
     const baseURL = process.env.REACT_APP_API_BASE_URL || 'https://localhost:2003';
     const endpoint = '/atm/receipt';
     try {
-      setLoading(true);
+      setLoading(true); // Set loading state while fetching data
       const response = await fetch(`${baseURL}${endpoint}`, {
         method: 'POST',
         headers: {
@@ -36,6 +38,7 @@ const Receipt = ({ token }) => {
 
       if (data.success) {
         const { receipt } = data;
+        // Update receipt data with masked account number and other details
         setReceiptData({
           accountNumber: maskAccountNumber(receipt.accountNumber),
           newBalance: receipt.newBalance,
@@ -45,27 +48,30 @@ const Receipt = ({ token }) => {
           transactionDate: receipt.transactionDate
         });
       } else {
-        setError(data.message);
+        setError(data.message); // Show error message from the server
         if (data.message === 'Session expired') {
-          alert('Session Expired');
-          navigate('/');
+          alert('Session Expired'); // Alert user if session expired
+          navigate('/'); // Redirect to the start page
         }
       }
     } catch (error) {
-      setError('Failed to connect to the server');
+      setError('Failed to connect to the server'); // Handle connection errors
     } finally {
-      setLoading(false);
+      setLoading(false); // Reset loading state
     }
   }, [token, navigate]);
 
+  // Fetch receipt data on component mount
   useEffect(() => {
     handleGetReceipt();
   }, [handleGetReceipt]);
 
+  // Render loading message while fetching data
   if (loading) {
     return <p className='text-center'>Loading receipt...</p>;
   }
 
+  // Destructure receiptData for rendering
   const { accountNumber, newBalance, transactionId, amount, notesToDispense, transactionDate } = receiptData;
 
   return (
@@ -89,7 +95,6 @@ const Receipt = ({ token }) => {
 
         <div className="mb-1 font-bold">Notes Dispensed:</div>
         <div className="mb-1">
-
           <ul className="list-none">
             {Object.entries(notesToDispense).map(([note, count]) => (
               <li key={note}>{note}: {count}</li>

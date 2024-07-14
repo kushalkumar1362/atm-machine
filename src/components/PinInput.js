@@ -12,13 +12,13 @@ const PinInput = ({ token }) => {
   const endpoint = '/atm/check-pin';
 
   const handleNext = async () => {
+    // Validate PIN input
     if (pin.length === 0) {
-      setPin('');
       setError('Please Enter the Pin');
       return;
     }
     try {
-      setLoading(true);
+      setLoading(true); // Show loading state while processing
       const response = await fetch(`${baseURL}${endpoint}`, {
         method: 'POST',
         headers: {
@@ -27,30 +27,33 @@ const PinInput = ({ token }) => {
         body: JSON.stringify({ token, pin }),
       });
       const data = await response.json();
+
       if (data.success) {
-        toast.success(data.message);
-        navigate('/amount', { replace: true });
+        toast.success(data.message); // Show success message
+        navigate('/amount', { replace: true }); // Navigate to the next step
       } else {
         if (data.message === 'Session expired' || data.message === "Invalid Pin") {
-          alert(data.message);
-          navigate('/');
+          alert(data.message); // Alert user if session expired or pin is invalid
+          navigate('/'); // Redirect to the start page
         }
-        setError(data.message);
+        setError(data.message); // Show error message from the server
       }
-      setPin('');
+      setPin(''); // Clear PIN input after submission
     } catch (error) {
-      setError('Failed to connect to the server');
+      setError('Failed to connect to the server'); // Handle connection errors
     } finally {
-      setLoading(false);
+      setLoading(false); // Reset loading state
     }
   };
 
+  // Effect to replace the current location in the history stack
   useEffect(() => {
     navigate(window.location.pathname, { replace: true });
   }, [navigate]);
 
   const handleInputChange = (e) => {
     const value = e.target.value;
+    // Validate input format: numeric and no more than 4 digits
     if (/^\d*$/.test(value) && value.length <= 4) {
       setPin(value);
       setError('');
@@ -61,10 +64,9 @@ const PinInput = ({ token }) => {
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
-      handleNext();
-    }
-    else if (e.key === 'Tab') {
-      e.preventDefault();
+      handleNext(); // Handle Enter key to submit form
+    } else if (e.key === 'Tab') {
+      e.preventDefault(); // Prevent Tab key to control focus manually
     }
   };
 

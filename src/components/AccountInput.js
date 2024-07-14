@@ -12,6 +12,7 @@ const AccountInput = ({ setToken }) => {
   const endpoint = '/atm/check-account';
 
   const handleNext = async () => {
+    // Validate input
     if (!accountNumber) {
       return setError('Please Enter the ATM card Number');
     }
@@ -20,7 +21,7 @@ const AccountInput = ({ setToken }) => {
     }
 
     try {
-      setLoading(true);
+      setLoading(true); // Show loading state while processing
       const response = await fetch(`${baseURL}${endpoint}`, {
         method: 'POST',
         headers: {
@@ -31,22 +32,23 @@ const AccountInput = ({ setToken }) => {
       const data = await response.json();
 
       if (data.success) {
-        toast.success(data.message);
-        setToken(data.token);
-        navigate('/pin');
+        toast.success(data.message); // Show success message
+        setToken(data.token); // Save token
+        navigate('/pin'); // Navigate to next step
       } else {
         setToken(null);
-        setError(data.message);
+        setError(data.message); // Show error message from server
       }
     } catch {
-      setError('Failed to connect to the server');
+      setError('Failed to connect to the server'); // Handle connection errors
     } finally {
-      setLoading(false);
+      setLoading(false); // Reset loading state
     }
   };
 
   const handleInputChange = (e) => {
     const value = e.target.value;
+    // Ensure input is numeric and no more than 16 digits
     if (/^\d{0,16}$/.test(value)) {
       setAccountNumber(value);
       setError('');
@@ -57,9 +59,9 @@ const AccountInput = ({ setToken }) => {
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
-      handleNext();
+      handleNext(); // Handle Enter key to submit form
     } else if (e.key === 'Tab') {
-      e.preventDefault();
+      e.preventDefault(); // Prevent Tab key to control focus manually
     }
   };
 
