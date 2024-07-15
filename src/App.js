@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import AccountInput from './components/AccountInput';
 import PinInput from './components/PinInput';
@@ -14,6 +14,8 @@ const App = () => {
   const [sessionExpired, setSessionExpired] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const steps = useMemo(() => ['/', '/pin', '/amount', '/receipt'], []);
+  const prevPathRef = useRef(location.pathname);
 
   useEffect(() => {
     if (token) {
@@ -28,6 +30,19 @@ const App = () => {
       }
     }
   }, [token, navigate]);
+
+  useEffect(() => {
+    const currentPath = location.pathname;
+    const prevPath = prevPathRef.current;
+
+    if (steps.indexOf(currentPath) < steps.indexOf(prevPath)) {
+      // If current path is a previous step, expire the session and navigate to the start page
+      setSessionExpired(true);
+      navigate('/');
+    }
+
+    prevPathRef.current = currentPath;
+  }, [location.pathname, navigate, steps]);
 
   const handleSessionExpired = () => {
     // Set session as expired and navigate to the start page
