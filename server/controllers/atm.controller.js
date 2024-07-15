@@ -22,7 +22,10 @@ const isTokenBlacklisted = async (token) => {
 
 // Function to handle session expiration response
 const handleSessionExpired = (res) => {
-  return res.status(401).json({ success: false, message: 'Session expired' });
+  return res.status(401).json({
+    success: false,
+    message: 'Session expired'
+  });
 };
 
 // Endpoint to invalidate a user session by blacklisting the token
@@ -39,10 +42,16 @@ exports.invalidateSession = async (req, res) => {
     const blacklistedToken = new Blacklist({ token });
     await blacklistedToken.save();
 
-    res.json({ success: true, message: 'Session Expired' });
+    res.json({
+      success: true,
+      message: 'Session Expired'
+    });
   } catch (error) {
     console.error('Error invalidating session:', error);
-    return res.status(500).json({ success: false, message: 'Failed to invalidate session' });
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to invalidate session'
+    });
   }
 };
 

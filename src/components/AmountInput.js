@@ -89,7 +89,10 @@ const AmountInput = ({ token }) => {
             <option value="1000">1000</option>
           </select>
           {error && <p className="text-red-500 mb-4">{error}</p>}
-          <button onClick={handleWithdraw} className="bg-blue-500 text-white py-2 px-4 rounded" disabled={loading}>
+          <button onClick={handleWithdraw}
+            className="bg-blue-500 text-white py-2 px-4 rounded"
+            disabled={loading}
+          >
             {loading ? 'Processing...' : 'Withdraw'}
           </button>
         </div>

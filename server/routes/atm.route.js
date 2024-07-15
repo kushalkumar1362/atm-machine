@@ -6,7 +6,6 @@ router.post('/check-account', checkAccount);
 router.post('/check-pin', checkPin);
 router.post('/withdraw', withdraw);
 router.post('/receipt', generateReceipt);
-router.post('/receipt', generateReceipt);
 router.post('/invalidate-session', invalidateSession);
 
 module.exports = router;
