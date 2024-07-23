@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from "react-hot-toast";
+import axios from 'axios';
 
 const PinInput = ({ token }) => {
   const [pin, setPin] = useState('');
@@ -19,24 +20,25 @@ const PinInput = ({ token }) => {
     }
     try {
       setLoading(true); // Show loading state while processing
-      const response = await fetch(`${baseURL}${endpoint}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ token, pin }),
-      });
-      const data = await response.json();
+      const response = await axios.post(
+        `${baseURL}${endpoint}`,
+        {pin},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-      if (data.success) {
-        toast.success(data.message); // Show success message
-        navigate('/amount', { replace: true }); // Navigate to the next step
+      if (response.data.success) {
+        toast.success(response.data.message); // Show success message
+        navigate('/balance-or-withdrawal'); // Navigate to the next step
       } else {
-        if (data.message === 'Session expired' || data.message === "Invalid Pin") {
-          alert(data.message); // Alert user if session expired or pin is invalid
+        if (response.data.message === 'Session expired' || response.data.message === "Invalid Pin") {
+          alert(response.data.message); // Alert user if session expired or pin is invalid
           navigate('/'); // Redirect to the start page
         }
-        setError(data.message); // Show error message from the server
+        setError(response.data.message); // Show error message from the server
       }
       setPin(''); // Clear PIN input after submission
     } catch (error) {
@@ -45,11 +47,6 @@ const PinInput = ({ token }) => {
       setLoading(false); // Reset loading state
     }
   };
-
-  // Effect to replace the current location in the history stack
-  useEffect(() => {
-    navigate(window.location.pathname, { replace: true });
-  }, [navigate]);
 
   const handleInputChange = (e) => {
     const value = e.target.value;

@@ -30,7 +30,7 @@ const AccountInput = ({ setToken }) => {
         body: JSON.stringify({ accountNumber }),
       });
       const data = await response.json();
-
+      
       if (data.success) {
         toast.success(data.message); // Show success message
         setToken(data.token); // Save token

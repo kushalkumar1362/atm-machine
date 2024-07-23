@@ -8,13 +8,15 @@ import TokenCountdown from './components/TokenCountdown';
 import CancelSession from './components/CancelSession';
 import { jwtDecode } from 'jwt-decode';
 import ProtectedRoute from './components/ProtectedRoute';
+import AmountBalance from './components/AmountBalance';
+import CheckBalance from './components/CheckBalance';
 
 const App = () => {
   const [token, setToken] = useState('');
   const [sessionExpired, setSessionExpired] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const steps = useMemo(() => ['/', '/pin', '/amount', '/receipt'], []);
+  const steps = useMemo(() => ['/', '/pin', '/balance-or-withdrawal', '/check-user-balance', '/amount', '/receipt'], []);
   const prevPathRef = useRef(location.pathname);
 
   useEffect(() => {
@@ -66,6 +68,22 @@ const App = () => {
           element={
             <ProtectedRoute token={token}>
               <PinInput token={token} />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/balance-or-withdrawal"
+          element={
+            <ProtectedRoute token={token}>
+              <AmountBalance token={token} />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/check-user-balance"
+          element={
+            <ProtectedRoute token={token}>
+              <CheckBalance token={token} />
             </ProtectedRoute>
           }
         />

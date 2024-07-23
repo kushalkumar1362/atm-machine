@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { toast } from "react-hot-toast";
+import axios from 'axios';
 
 const AmountInput = ({ token }) => {
   const [amount, setAmount] = useState('');
@@ -16,25 +17,25 @@ const AmountInput = ({ token }) => {
   const handleWithdraw = async () => {
     try {
       setLoading(true); // Set loading state while processing
-      const response = await fetch(`${baseURL}${endpoint}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ token, amount, denomination }),
-      });
+      const response = await axios.post(
+        `${baseURL}${endpoint}`,
+        { amount, denomination },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-      const data = await response.json();
-
-      if (data.success) {
-        toast.success(data.message); // Show success message
+      if (response.data.success) {
+        toast.success(response.data.message); // Show success message
         setWithdrawn(true); // Set withdrawn state to true
       } else {
         setAmount('');
         setDenomination('');
-        setError(data.message); // Show error message from server
-        if (data.message === 'Session expired' || data.message === 'Insufficient Balance') {
-          alert(data.message); // Alert user if session expired or balance is insufficient
+        setError(response.data.message); // Show error message from server
+        if (response.data.message === 'Session expired' || response.data.message === 'Insufficient Balance') {
+          alert(response.data.message); // Alert user if session expired or balance is insufficient
           navigate('/'); // Redirect to the start page
         }
       }

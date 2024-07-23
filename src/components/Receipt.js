@@ -1,3 +1,4 @@
+import axios from 'axios';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -26,18 +27,18 @@ const Receipt = ({ token }) => {
     const endpoint = '/atm/receipt';
     try {
       setLoading(true); // Set loading state while fetching data
-      const response = await fetch(`${baseURL}${endpoint}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ token }),
-      });
+      const response = await axios.post(
+        `${baseURL}${endpoint}`,
+        { },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-      const data = await response.json();
-
-      if (data.success) {
-        const { receipt } = data;
+      if (response.data.success) {
+        const { receipt } = response.data;
         // Update receipt data with masked account number and other details
         setReceiptData({
           accountNumber: maskAccountNumber(receipt.accountNumber),
@@ -48,8 +49,8 @@ const Receipt = ({ token }) => {
           transactionDate: receipt.transactionDate
         });
       } else {
-        setError(data.message); // Show error message from the server
-        if (data.message === 'Session expired') {
+        setError(response.data.message); // Show error message from the server
+        if (response.data.message === 'Session expired') {
           alert('Session Expired'); // Alert user if session expired
           navigate('/'); // Redirect to the start page
         }

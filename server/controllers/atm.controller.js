@@ -4,6 +4,7 @@ const ATM = require('../models/atm.model');
 const Transaction = require('../models/transaction.model');
 const Blacklist = require('../models/blockToken.model');
 const { dispenseCash } = require('../utils/cashDispenser.utils');
+const { isTokenBlacklisted } = require('../middlewares/auth.middleware');
 require("dotenv").config();
 
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -14,40 +15,25 @@ const isAccountBlocked = (user) => {
   return user.blockUntil && new Date() < new Date(user.blockUntil);
 };
 
-// Function to check if a JWT token is blacklisted
-const isTokenBlacklisted = async (token) => {
-  const blacklistedToken = await Blacklist.findOne({ token });
-  return !!blacklistedToken;
-};
-
-// Function to handle session expiration response
-const handleSessionExpired = (res) => {
-  res.clearCookie('token');
-  return res.status(401).json({
-    success: false,
-    message: 'Session expired'
-  });
-};
-
 // Endpoint to invalidate a user session by blacklisting the token
 exports.invalidateSession = async (req, res) => {
-  // 1. Fetch token from cookie
+  // 1. Fetch token from header
   // 2. check is token is already exists in blockList
   // 3. otherwise block the token
   // 4. Return response
-  const { token } = req.cookies;
-
+  const token = req.headers.authorization.split(' ')[1];
   try {
     // Check if the token is already blacklisted
     if (await isTokenBlacklisted(token)) {
-      return handleSessionExpired(res);
+      return res.status(401).json({
+        success: false,
+        message: 'Session expired'
+      });
     }
 
     // Add the token to the blacklist
     const blacklistedToken = new Blacklist({ token });
     await blacklistedToken.save();
-
-    res.clearCookie('token');
     res.json({
       success: true,
       message: 'Session Expired'
@@ -63,7 +49,7 @@ exports.invalidateSession = async (req, res) => {
 
 // Endpoint to check if an account exists and generate a JWT token for authentication
 exports.checkAccount = async (req, res) => {
-  // 1. Get account number from req.body
+  // 1. Get account number from header
   // 2. return response if user not exists
   // 3. check is user block or not
   // 4. Generate JWT
@@ -89,16 +75,10 @@ exports.checkAccount = async (req, res) => {
 
     const token = jwt.sign({ accountNumber }, JWT_SECRET, { expiresIn: JWT_EXPIRATION });
 
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: true, // set this to false if you are not using HTTPS
-      sameSite: 'strict',
-      maxAge: 2 * 60 * 1000 // 2 minutes in milliseconds
-    });
-
     res.json({
       success: true,
       message: "Card Successfully Verified",
+      token,
     });
   } catch (error) {
     console.error('Error checking account:', error);
@@ -111,36 +91,25 @@ exports.checkAccount = async (req, res) => {
 
 // Endpoint to check PIN for authentication
 exports.checkPin = async (req, res) => {
-  // 1. Get pin number from req.body and token from cookie
+  // 1. Get pin number from req.body and token from header
   // 2. check is token blocked means expired
   // 3. Decode token
   // 4. find user
   // 5. check is user block or not
   // 6. Reset Last wrong pin attempts date after 24 hour
   // 7. Validate the pin or block user after 3 wrong attempts
-  // 8.  Reset Last wrong pin attempts after correct pin
+  // 8. Reset Last wrong pin attempts after correct pin
   // 9. Return response
   const { pin } = req.body;
-  const token = req.cookies.token;
-
+  const token = req.headers.authorization.split(' ')[1];
   try {
-    if (await isTokenBlacklisted(token)) {
-      return handleSessionExpired(res);
-    }
-
-    let decoded;
-    try {
-      decoded = jwt.verify(token, JWT_SECRET);
-    } catch (err) {
-      return handleSessionExpired(res);
-    }
-
+    const decoded = jwt.verify(token, JWT_SECRET);
     const user = await User.findOne({ accountNumber: decoded.accountNumber });
 
     if (!user) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid Account',
+        message: 'Invalid account',
       });
     }
 
@@ -182,6 +151,7 @@ exports.checkPin = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Pin verified successfully",
+      token,
     });
   } catch (error) {
     console.error('Error checking pin:', error);
@@ -196,36 +166,26 @@ exports.checkPin = async (req, res) => {
 
 // Endpoint to check PIN for authentication
 exports.checkBalance = async (req, res) => {
-  // 1.Fetch token from cookie
+  // 1.Fetch token from body
   // 2. check is token blocked means expired
   // 3. Validate token
   // 4. find user and validate
   // 5. Return Resposne
-  const token = req.cookies.token;
-
+  const token = req.headers.authorization.split(' ')[1];
   try {
-    if (await isTokenBlacklisted(token)) {
-      return handleSessionExpired(res);
-    }
-
-    let decoded;
-    try {
-      decoded = jwt.verify(token, JWT_SECRET);
-    } catch (err) {
-      return handleSessionExpired(res);
-    }
-
+    const decoded = jwt.verify(token, JWT_SECRET);
     const user = await User.findOne({ accountNumber: decoded.accountNumber });
 
     if (!user) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid Account',
+        message: 'Invalid account',
       });
     }
+
     return res.status(200).json({
       success: true,
-      message: "Balance checked successfully",
+      message: 'Balance checked successfully',
       balance: user.balance
     });
   } catch (error) {
@@ -241,7 +201,7 @@ exports.checkBalance = async (req, res) => {
 
 // Endpoint to process cash withdrawal
 exports.withdraw = async (req, res) => {
-  // 1. Fetch Amount and denomination from req and token from cookie
+  // 1. Fetch Amount, token and denomination from req
   // 2. validate the token
   // 3. validate the amount and denomination
   // 4. find user 
@@ -253,21 +213,12 @@ exports.withdraw = async (req, res) => {
   // 10. Generate transacction  
   // 11 Update user, transaction, notes in DB 
   // 12. Return response
+  const { amount, denomination } = req.body;
+  const token = req.headers.authorization.split(' ')[1];
+  const denominationNumber = parseInt(denomination, 10);
+
   try {
-    const { amount, denomination } = req.body;
-    const token = req.cookies.token;
-    const denominationNumber = parseInt(denomination, 10);
-
-    if (await isTokenBlacklisted(token)) {
-      return handleSessionExpired(res);
-    }
-
-    let decoded;
-    try {
-      decoded = jwt.verify(token, JWT_SECRET);
-    } catch (err) {
-      return handleSessionExpired(res);
-    }
+    const decoded = jwt.verify(token, JWT_SECRET);
 
     if (!amount) {
       return res.status(401).json({
@@ -304,7 +255,7 @@ exports.withdraw = async (req, res) => {
       await blacklistedToken.save();
       return res.status(400).json({
         success: false,
-        message: 'Insufficient Balance',
+        message: 'Insufficient balance',
       });
     }
 
@@ -350,16 +301,18 @@ exports.withdraw = async (req, res) => {
     user.transactions.push(transaction._id);
     await user.save();
 
-    await ATM.updateOne({}, atm);
+    await ATM.updateOne(
+      { _id: atm._id },
+      { $inc: { [`notes.${denomination}`]: -notesToDispense[denomination] } }
+    );
 
     return res.status(200).json({
       success: true,
-      message: 'Cash withdrawal successful',
-      newBalance: user.balance,
-      notesToDispense,
+      message: 'Withdrawal successful',
+      notesDispensed: notesToDispense,
     });
   } catch (error) {
-    console.error('Error withdrawing cash:', error);
+    console.error('Error processing withdrawal:', error);
     return res.status(400).json({
       success: false,
       message: error.message,
@@ -370,31 +323,16 @@ exports.withdraw = async (req, res) => {
 
 // Endpoint to generate receipt for the last transaction
 exports.generateReceipt = async (req, res) => {
-  // 1. fetch token from cookie
+  // 1. fetch token from body
   // 2. check is token blocked means expired
   // 3. validate token
   // 4. find user
   // 5. generate receipt
   // 6. Return response
-  const token = req.cookies.token;
+  const token = req.headers.authorization.split(' ')[1];
 
   try {
-    if (await isTokenBlacklisted(token)) {
-      return handleSessionExpired(res);
-    }
-    if (!token) {
-      return res.status(400).json({
-        success: false,
-        message: 'Token not provided',
-      });
-    }
-
-    let decoded;
-    try {
-      decoded = jwt.verify(token, JWT_SECRET);
-    } catch (err) {
-      return handleSessionExpired(res);
-    }
+    const decoded = jwt.verify(token, JWT_SECRET);
 
     const user = await User.findOne({ accountNumber: decoded.accountNumber }).populate('transactions');
 
