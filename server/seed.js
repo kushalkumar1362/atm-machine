@@ -111,7 +111,7 @@ async function connectAndSeed() {
 }
 
 // Schedule the task to run every minute for testing
-cron.schedule('* * * * *', () => {
+cron.schedule('0 * * * *', () => {
   console.log('Running balance refresh task every minute');
   refreshUserBalances(); // Refresh balances every minute
 });

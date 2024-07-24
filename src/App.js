@@ -10,6 +10,7 @@ import { jwtDecode } from 'jwt-decode';
 import ProtectedRoute from './ProtectedRoute';
 import AmountBalance from './components/AmountBalance';
 import CheckBalance from './components/CheckBalance';
+import Scroll from './components/ScrollText';
 
 const App = () => {
   const [token, setToken] = useState('');
@@ -59,61 +60,65 @@ const App = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center w-screen h-screen bg-gray-100 relative overflow-scroll">
-      <h1 className='bg-gradient-01 bg-clip-text text-transparent text-4xl font-bold mb-10 text-center'>ATM Cash Withdrawal</h1>
-      <Routes>
-        <Route path="/" element={<AccountInput setToken={handleLogin} />} />
-        <Route
-          path="/pin"
-          element={
-            <ProtectedRoute token={token}>
-              <PinInput token={token} />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/balance-or-withdrawal"
-          element={
-            <ProtectedRoute token={token}>
-              <AmountBalance token={token} />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/check-user-balance"
-          element={
-            <ProtectedRoute token={token}>
-              <CheckBalance token={token} />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/amount"
-          element={
-            <ProtectedRoute token={token}>
-              <AmountInput token={token} />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/receipt"
-          element={
-            <ProtectedRoute token={token}>
-              <Receipt token={token} />
-            </ProtectedRoute>
-          }
-        />
-      </Routes>
-      {location.pathname !== '/' && location.pathname !== '/receipt' && (
-        <div className="absolute top-4 right-4">
-          <TokenCountdown token={token} sessionExpired={sessionExpired} onSessionExpired={handleSessionExpired} />
-        </div>
-      )}
-      {location.pathname !== '/' && (
-        <div>
-          <CancelSession token={token} onSessionExpired={handleSessionExpired} />
-        </div>
-      )}
+
+    <div>
+      <Scroll />
+      <div className="flex flex-col items-center justify-center w-screen h-screen bg-gray-100 relative overflow-scroll">
+        <h1 className='bg-gradient-01 bg-clip-text text-transparent text-4xl font-bold mb-10 text-center'>ATM Cash Withdrawal</h1>
+        <Routes>
+          <Route path="/" element={<AccountInput setToken={handleLogin} />} />
+          <Route
+            path="/pin"
+            element={
+              <ProtectedRoute token={token}>
+                <PinInput token={token} />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/balance-or-withdrawal"
+            element={
+              <ProtectedRoute token={token}>
+                <AmountBalance token={token} />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/check-user-balance"
+            element={
+              <ProtectedRoute token={token}>
+                <CheckBalance token={token} />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/amount"
+            element={
+              <ProtectedRoute token={token}>
+                <AmountInput token={token} />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/receipt"
+            element={
+              <ProtectedRoute token={token}>
+                <Receipt token={token} />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+        {location.pathname !== '/' && location.pathname !== '/receipt' && (
+          <div className="absolute top-4 right-4">
+            <TokenCountdown token={token} sessionExpired={sessionExpired} onSessionExpired={handleSessionExpired} />
+          </div>
+        )}
+        {location.pathname !== '/' && (
+          <div>
+            <CancelSession token={token} onSessionExpired={handleSessionExpired} />
+          </div>
+        )}
+      </div>
     </div>
   );
 };
