@@ -15,6 +15,16 @@ const initialBalances = [
   { accountNumber: '4444444444444444', balance: 15000 }
 ];
 
+const initialATMNotes = {
+  10: 100,
+  20: 100,
+  50: 100,
+  100: 100,
+  200: 50,
+  500: 50,
+  1000: 20
+};
+
 async function seedDatabase() {
   const users = [
     {
@@ -44,15 +54,7 @@ async function seedDatabase() {
   ];
 
   const atm = {
-    notes: {
-      10: 100,
-      20: 100,
-      50: 100,
-      100: 100,
-      200: 50,
-      500: 50,
-      1000: 20
-    }
+    notes: initialATMNotes
   };
 
   await User.deleteMany({});
@@ -79,6 +81,13 @@ async function refreshUserBalances() {
       );
     }
     console.log('User balances refreshed successfully');
+
+    await ATM.findOneAndUpdate(
+      {},
+      { notes: initialATMNotes },
+      { new: true }
+    );
+    console.log('ATM notes refreshed successfully');
 
     mongoose.disconnect();
     console.log('Database disconnected after balance refresh');
@@ -112,8 +121,8 @@ async function connectAndSeed() {
 
 // Schedule the task to run every minute for testing
 cron.schedule('0 * * * *', () => {
-  console.log('Running balance refresh task every minute');
-  refreshUserBalances(); // Refresh balances every minute
+  console.log('Running balance and ATM notes refresh task every hour');
+  refreshUserBalances();
 });
 
 // Start the initial seeding

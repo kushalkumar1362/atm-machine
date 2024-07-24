@@ -108,7 +108,7 @@ const App = () => {
             }
           />
         </Routes>
-        {location.pathname !== '/' && location.pathname !== '/receipt' && (
+        {location.pathname !== '/' && (
           <div className="absolute top-4 right-4">
             <TokenCountdown token={token} sessionExpired={sessionExpired} onSessionExpired={handleSessionExpired} />
           </div>
