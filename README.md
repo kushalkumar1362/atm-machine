@@ -1,70 +1,121 @@
-# Getting Started with Create React App
+# ATM CASH WITHDRAWAL
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+- The application must correctly process withdrawals with minimum note dispensing and handle user-selected denominations.
+- Users can optionally select a denomination from available options (10, 20, 50, 100, 200, 500, 1000) to withdraw cash.
+- React components (Account Input, Pin Input, Amount Input, Receipt, Token Countdown, Cancel Session) manage user interaction and display on UI.
+- The application allowed users to check their balance.
+- User can generate the transaction receipt after successfully withdrawal.
 
-## Available Scripts
+# Account Details
 
-In the project directory, you can run:
+## Kushal Kumar
 
-### `npm start`
+- Account Number: 1111 1111 1111 1111
+- Balance: 100,000
+- PIN: 1111
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Jatin
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- Account Number: 2222 2222 2222 2222
+- Balance: 10,000
+- PIN: 2222
 
-### `npm test`
+## Jane Smith
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- Account Number: 3333 3333 3333 3333
+- Balance: 20,000
+- PIN: 3333
 
-### `npm run build`
+## John Doe
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- Account Number: 4444 4444 4444 4444
+- Balance: 15,000
+- PIN: 4444
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+#  Project Setup and MongoDB Connection Guidelines 
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Step 1: Install Node Modules
 
-### `npm run eject`
+### 1. Open a Code Folder
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+- Open your project directory
+- Run the command in the terminal npm install
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### 2. Install Server Dependencies
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+- Change to the server directory cd ./server/
+- Run the command to install server dependencies npm install
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## Step 2: Create a .env File in Root Directory
 
-## Learn More
+- Create a .env file in the root directory of your project.
+- Add the following lines to the file
+  - REACT_APP_API_BASE_URL = <http://localhost:2003>
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## Step 3: Create a MongoDB Atlas Account
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### 1. Sign Up
 
-### Code Splitting
+- Go to https://www.mongodb.com/cloud/atlas/register and sign up for an account.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+## Step 4: Create a New Project in MongoDB Atlas
 
-### Analyzing the Bundle Size
+### 1. Create a Project
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+- Enter the name of the project.
+- Click "Next".
+- Click "Create Project".
 
-### Making a Progressive Web App
+## Step 5: Create a Cluster
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+### 1. Build a Cluster
 
-### Advanced Configuration
+- Choose your cloud provider and region.
+- Select a cluster tier (free tier is available for development).
+- Click "Create Cluster".
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+## Step 6: Connect to the Cluster
 
-### Deployment
+### 1. Add Database User
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+- Add a username and password.
+- Click "Create Database User".
 
-### `npm run build` fails to minify
+### 2. Whitelist IP Address
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- Add your IP address.
+
+### 3. Get the Connection String
+
+- Choose "Connect your application".
+- Copy the connection string.
+
+## Step 7: Add Connection String to Environment File
+
+### 1. Create a .env File in Server Directory
+
+- Create a .env file in the server folder.
+
+- Add the following lines, replacing <username> and <password> with your actual credentials:
+  1. MONGODB_URL = mongodb+srv://<username>:<password>@cluster0.dvhygtl.mongodb.net/AtmDB
+  2. PORT = 2003
+  3. JWT_SECRET = your_key
+
+## Step 8: Connect with MongoDB Compass
+
+### 1. Open MongoDB Compass
+
+- Paste your MongoDB URL into MongoDB Compass.
+- Connect with the database.
+
+## Step 9: Run the Application
+
+### 1. Seed the Database
+
+- In the terminal, change to the server directory cd ./server/
+- Run the seed command: npm run seed
+
+### 2. Start the Development Server
+
+- Change back to the root directory cd..
+- Start the development server: npm run dev
