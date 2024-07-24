@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const CheckBalance = ({ token }) => {
+const CheckBalance = React.memo(({ token }) => {
   const [balance, setBalance] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -19,7 +19,6 @@ const CheckBalance = ({ token }) => {
             },
           }
         );
-        console.log(response.data.success);
         if (response.data.success) {
           setBalance(response.data.balance);
         } else {
@@ -48,6 +47,6 @@ const CheckBalance = ({ token }) => {
       <p className='text-[20px]'>Your current balance is: ₹{balance}</p>
     </div>
   );
-};
+});
 
 export default CheckBalance;

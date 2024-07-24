@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { jwtDecode } from 'jwt-decode'; // Assuming the correct import would be 'jwt_decode' instead of 'jwt-decode'
+import {jwtDecode} from 'jwt-decode'; // Correct import for jwt-decode
 
-const TokenCountdown = ({ token, sessionExpired, onSessionExpired }) => {
+const TokenCountdown = ({ token, onSessionExpired }) => {
   // Function to calculate time left until token expiry
   const calculateTimeLeft = () => {
     try {
@@ -11,8 +11,8 @@ const TokenCountdown = ({ token, sessionExpired, onSessionExpired }) => {
       return Math.max(Math.floor((exp - now) / 1000), 0); // Calculate seconds left until expiry
     } catch (error) {
       // Handle invalid token format gracefully
-      // console.error('Invalid token format', error);
-      return 0; // Return 0 seconds if there's an error
+      console.error('Invalid token format', error);
+      return 0;
     }
   };
 
@@ -21,8 +21,8 @@ const TokenCountdown = ({ token, sessionExpired, onSessionExpired }) => {
   // Effect to update countdown every second and handle session expiration
   useEffect(() => {
     if (timeLeft <= 0) {
-      // If timeLeft is zero or less, session is expired
       onSessionExpired(); // Call callback function to handle session expiration
+      alert('Session Expired.');
       return;
     }
 
@@ -33,18 +33,17 @@ const TokenCountdown = ({ token, sessionExpired, onSessionExpired }) => {
           onSessionExpired(); // Call callback function to handle session expiration
           return 0;
         }
-        return prevTime - 1; // Decrease time left by one second
+        return prevTime - 1; 
       });
-    }, 1000); // Update countdown every second
+    }, 1000);
 
-    return () => clearInterval(intervalId); // Clean up interval on component unmount or when timeLeft reaches zero
-  }, [timeLeft, onSessionExpired]); // Depend on timeLeft and onSessionExpired function
+    return () => clearInterval(intervalId); // Clean up interval on component unmount
+  }, [timeLeft, onSessionExpired]); 
 
   return (
     <div className="text-center">
-      {/* Conditional rendering based on session expiration */}
-      {timeLeft > 0 && !sessionExpired ? (
-        <h1 className="text-2xl font-bold text-gray-800">
+      {timeLeft > 0 ? (
+        <h1 className={`text-2xl font-bold ${timeLeft <= 10 ? "text-red-500" : "text-gray-800"}`}>
           Session expires in {timeLeft} {timeLeft === 1 ? 'second' : 'seconds'}
         </h1>
       ) : (

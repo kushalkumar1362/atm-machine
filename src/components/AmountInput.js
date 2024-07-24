@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { toast } from "react-hot-toast";
+import { toast } from 'react-hot-toast';
 import axios from 'axios';
 
-const AmountInput = ({ token }) => {
+const AmountInput = React.memo(({ token }) => {
   const [amount, setAmount] = useState('');
   const [denomination, setDenomination] = useState('');
   const [error, setError] = useState('');
@@ -14,7 +14,19 @@ const AmountInput = ({ token }) => {
   const baseURL = process.env.REACT_APP_API_BASE_URL || 'https://localhost:2003';
   const endpoint = '/atm/withdraw';
 
-  const handleWithdraw = async () => {
+  const validateInput = useCallback(() => {
+    if (!amount) {
+      return 'Please enter an amount';
+    }
+    return '';
+  }, [amount]);
+
+  const handleWithdraw = useCallback(async () => {
+    const validationError = validateInput();
+    if (validationError) {
+      return setError(validationError);
+    }
+
     try {
       setLoading(true); // Set loading state while processing
       const response = await axios.post(
@@ -35,7 +47,7 @@ const AmountInput = ({ token }) => {
         setDenomination('');
         setError(response.data.message); // Show error message from server
         if (response.data.message === 'Session expired' || response.data.message === 'Insufficient Balance') {
-          alert(response.data.message); // Alert user if session expired or balance is insufficient
+          alert(response.data.message); 
           navigate('/'); // Redirect to the start page
         }
       }
@@ -44,7 +56,7 @@ const AmountInput = ({ token }) => {
     } finally {
       setLoading(false); // Reset loading state
     }
-  };
+  }, [amount, denomination, baseURL, endpoint, token, navigate, validateInput]);
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
@@ -63,7 +75,7 @@ const AmountInput = ({ token }) => {
     <div>
       {!withdrawn ? (
         <div className="flex flex-col items-center justify-center" onKeyDown={handleKeyPress}>
-          <h2 className="text-2xl mb-4">Enter Amount and Denomination</h2>
+          <h2 className="text-2xl mb-4 text-center">Enter Amount and Denomination</h2>
           <input
             type="number"
             className="border-2 border-gray-500 p-2 focus:outline-none focus:border-teal-500 rounded-lg mb-8"
@@ -89,7 +101,7 @@ const AmountInput = ({ token }) => {
             <option value="500">500</option>
             <option value="1000">1000</option>
           </select>
-          {error && <p className="text-red-500 mb-4">{error}</p>}
+          {error && <p className="text-red-500 text-center">{error}</p>}
           <button onClick={handleWithdraw}
             className="bg-blue-500 text-white py-2 px-4 rounded"
             disabled={loading}
@@ -100,7 +112,7 @@ const AmountInput = ({ token }) => {
       ) : (
         <div className="flex gap-20 items-center justify-center">
           <NavLink to={'/receipt'}>
-            <div className="bg-blue-500 text-white py-2 px-4 rounded mt-4">
+              <div className="bg-blue-500 text-white py-2 px-5 rounded mt-4 border-[2px] border-blue-500 hover:bg-slate-50 hover:text-blue-500 transition-all duration-300 font-semibold">
               Get Receipt
             </div>
           </NavLink>
@@ -108,6 +120,6 @@ const AmountInput = ({ token }) => {
       )}
     </div>
   );
-};
+});
 
 export default AmountInput;

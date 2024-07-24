@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
+import axios from 'axios';
 
-const AccountInput = ({ setToken }) => {
+const AccountInput = React.memo(({ setToken }) => {
   const [accountNumber, setAccountNumber] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -11,44 +12,43 @@ const AccountInput = ({ setToken }) => {
   const baseURL = process.env.REACT_APP_API_BASE_URL || 'https://localhost:2003';
   const endpoint = '/atm/check-account';
 
-  const handleNext = async () => {
-    // Validate input
+  const validateInput = useCallback(() => {
     if (!accountNumber) {
-      return setError('Please Enter the ATM card Number');
+      return 'Please Enter the ATM card Number';
     }
     if (accountNumber.length !== 16) {
-      return setError('Please enter a 16-digit ATM card number');
+      return 'Please enter a 16-digit ATM card number';
+    }
+    return '';
+  }, [accountNumber]);
+
+  const handleNext = useCallback(async () => {
+    const validationError = validateInput();
+    if (validationError) {
+      return setError(validationError);
     }
 
     try {
       setLoading(true); // Show loading state while processing
-      const response = await fetch(`${baseURL}${endpoint}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ accountNumber }),
-      });
-      const data = await response.json();
-      
-      if (data.success) {
-        toast.success(data.message); // Show success message
-        setToken(data.token); // Save token
-        navigate('/pin'); // Navigate to next step
+      const response = await axios.post(`${baseURL}${endpoint}`, { accountNumber });
+
+      if (response.data.success) {
+        toast.success(response.data.message);
+        setToken(response.data.token);
+        navigate('/pin');
       } else {
         setToken(null);
-        setError(data.message); // Show error message from server
+        setError(response.data.message);
       }
-    } catch {
-      setError('Failed to connect to the server'); // Handle connection errors
+    } catch (error) {
+      setError('Failed to connect to the server');
     } finally {
-      setLoading(false); // Reset loading state
+      setLoading(false);
     }
-  };
+  }, [accountNumber, baseURL, endpoint, navigate, setToken, validateInput]);
 
   const handleInputChange = (e) => {
     const value = e.target.value;
-    // Ensure input is numeric and no more than 16 digits
     if (/^\d{0,16}$/.test(value)) {
       setAccountNumber(value);
       setError('');
@@ -59,9 +59,9 @@ const AccountInput = ({ setToken }) => {
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
-      handleNext(); // Handle Enter key to submit form
+      handleNext();
     } else if (e.key === 'Tab') {
-      e.preventDefault(); // Prevent Tab key to control focus manually
+      e.preventDefault();
     }
   };
 
@@ -77,16 +77,16 @@ const AccountInput = ({ setToken }) => {
         autoFocus
         disabled={loading}
       />
-      {error && <p className="text-red-500">{error}</p>}
+      {error && <p className="text-red-500 text-center">{error}</p>}
       <button
         onClick={handleNext}
-        className="bg-blue-500 text-white py-2 px-4 rounded mt-4"
+        className="bg-blue-500 text-white py-2 px-5 rounded mt-4 border-[2px] border-blue-500 hover:bg-slate-50 hover:text-blue-500 transition-all duration-300 font-semibold"
         disabled={loading}
       >
         {loading ? 'Processing...' : 'Next'}
       </button>
     </div>
   );
-};
+});
 
 export default AccountInput;

@@ -7,7 +7,7 @@ import Receipt from './components/Receipt';
 import TokenCountdown from './components/TokenCountdown';
 import CancelSession from './components/CancelSession';
 import { jwtDecode } from 'jwt-decode';
-import ProtectedRoute from './components/ProtectedRoute';
+import ProtectedRoute from './ProtectedRoute';
 import AmountBalance from './components/AmountBalance';
 import CheckBalance from './components/CheckBalance';
 
@@ -59,8 +59,8 @@ const App = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center w-screen h-screen bg-gray-100 relative">
-      <h1 className='bg-gradient-01 bg-clip-text text-transparent text-4xl font-bold mb-10'>ATM Cash Withdrawal</h1>
+    <div className="flex flex-col items-center justify-center w-screen h-screen bg-gray-100 relative overflow-scroll">
+      <h1 className='bg-gradient-01 bg-clip-text text-transparent text-4xl font-bold mb-10 text-center'>ATM Cash Withdrawal</h1>
       <Routes>
         <Route path="/" element={<AccountInput setToken={handleLogin} />} />
         <Route

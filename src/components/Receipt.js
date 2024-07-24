@@ -2,7 +2,7 @@ import axios from 'axios';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const Receipt = ({ token }) => {
+const Receipt = React.memo(({ token }) => {
   const [receiptData, setReceiptData] = useState({
     accountNumber: '',
     newBalance: '',
@@ -29,7 +29,7 @@ const Receipt = ({ token }) => {
       setLoading(true); // Set loading state while fetching data
       const response = await axios.post(
         `${baseURL}${endpoint}`,
-        { },
+        {},
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -56,7 +56,8 @@ const Receipt = ({ token }) => {
         }
       }
     } catch (error) {
-      setError('Failed to connect to the server'); // Handle connection errors
+      console.error('Error fetching receipt:', error);
+      setError('Failed to fetch receipt');
     } finally {
       setLoading(false); // Reset loading state
     }
@@ -74,37 +75,39 @@ const Receipt = ({ token }) => {
 
   // Destructure receiptData for rendering
   const { accountNumber, newBalance, transactionId, amount, notesToDispense, transactionDate } = receiptData;
+  const receipt = [
+    { title: "Card Number:", value: accountNumber },
+    { title: "Transaction ID:", value: transactionId },
+    { title: "Amount:", value: amount },
+    { title: "Date:", value: new Date(transactionDate).toLocaleString() },
+    { title: "New Balance:", value: newBalance },
+  ];
 
   return (
-    <div className='flex flex-col items-center justify-center'>
-      {error && <p className="text-red-500 mb-4">{error}</p>}
-      <div className="grid grid-cols-2 gap-2" >
-        <div className="mb-1 font-bold">Card Number:</div>
-        <div className="mb-1">{accountNumber}</div>
+    <div className='flex flex-col items-center justify-center p-4'>
+      {error && <p className="text-red-500 mb-4 text-center">{error}</p>}
 
-        <div className="mb-1 font-bold">Transaction ID:</div>
-        <div className="mb-1">{transactionId}</div>
+      <div>
+        {receipt.map((data, index) => (
+          <div key={index} className='grid grid-cols-2 gap-2 max-w-[90%]'>
+            <div className="mb-1 font-bold">{data.title}</div>
+            <div className="mb-1">{data.value}</div>
+          </div>
+        ))}
 
-        <div className="mb-1 font-bold">Amount:</div>
-        <div className="mb-1">{amount}</div>
-
-        <div className="mb-1 font-bold">Date:</div>
-        <div className="mb-1">{new Date(transactionDate).toLocaleString()}</div>
-
-        <div className="mb-1 font-bold">New Balance:</div>
-        <div className="mb-1">{newBalance}</div>
-
-        <div className="mb-1 font-bold">Notes Dispensed:</div>
-        <div className="mb-1">
-          <ul className="list-none">
-            {Object.entries(notesToDispense).map(([note, count]) => (
-              <li key={note}>{note}: {count}</li>
-            ))}
-          </ul>
+        <div className='grid grid-cols-2 gap-2 max-w-[90%]'>
+          <div className="mb-1 font-bold">Notes Dispensed:</div>
+          <div className="mb-1">
+            <ul className="list-none">
+              {Object.entries(notesToDispense).map(([note, count]) => (
+                <li key={note}>{note}: {count}</li>
+              ))}
+            </ul>
+          </div>
         </div>
       </div>
     </div>
   );
-};
+});
 
 export default Receipt;

@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from "react-hot-toast";
+import { toast } from 'react-hot-toast';
 import axios from 'axios';
 
-const PinInput = ({ token }) => {
+const PinInput = React.memo(({ token }) => {
   const [pin, setPin] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -12,17 +12,24 @@ const PinInput = ({ token }) => {
   const baseURL = process.env.REACT_APP_API_BASE_URL || 'https://localhost:2003';
   const endpoint = '/atm/check-pin';
 
-  const handleNext = async () => {
-    // Validate PIN input
+  const validateInput = useCallback(() => {
     if (pin.length === 0) {
-      setError('Please Enter the Pin');
-      return;
+      return 'Please Enter the Pin';
     }
+    return '';
+  }, [pin]);
+
+  const handleNext = useCallback(async () => {
+    const validationError = validateInput();
+    if (validationError) {
+      return setError(validationError);
+    }
+
     try {
       setLoading(true); // Show loading state while processing
       const response = await axios.post(
         `${baseURL}${endpoint}`,
-        {pin},
+        { pin },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -31,14 +38,14 @@ const PinInput = ({ token }) => {
       );
 
       if (response.data.success) {
-        toast.success(response.data.message); // Show success message
-        navigate('/balance-or-withdrawal'); // Navigate to the next step
+        toast.success(response.data.message); 
+        navigate('/balance-or-withdrawal'); 
       } else {
-        if (response.data.message === 'Session expired' || response.data.message === "Invalid Pin") {
+        if (response.data.message === 'Session expired' || response.data.message === 'Invalid Pin') {
           alert(response.data.message); // Alert user if session expired or pin is invalid
-          navigate('/'); // Redirect to the start page
+          navigate('/'); 
         }
-        setError(response.data.message); // Show error message from the server
+        setError(response.data.message);
       }
       setPin(''); // Clear PIN input after submission
     } catch (error) {
@@ -46,7 +53,7 @@ const PinInput = ({ token }) => {
     } finally {
       setLoading(false); // Reset loading state
     }
-  };
+  }, [pin, baseURL, endpoint, token, navigate, validateInput]);
 
   const handleInputChange = (e) => {
     const value = e.target.value;
@@ -79,16 +86,16 @@ const PinInput = ({ token }) => {
         autoFocus
         disabled={loading}
       />
-      {error && <p className="text-red-500">{error}</p>}
+      {error && <p className="text-red-500 text-center">{error}</p>}
       <button
         onClick={handleNext}
-        className="bg-blue-500 text-white py-2 px-4 rounded mt-4"
+        className="bg-blue-500 text-white py-2 px-5 rounded mt-4 border-[2px] border-blue-500 hover:bg-slate-50 hover:text-blue-500 transition-all duration-300 font-semibold"
         disabled={loading}
       >
         {loading ? 'Processing...' : 'Next'}
       </button>
     </div>
   );
-};
+});
 
 export default PinInput;
