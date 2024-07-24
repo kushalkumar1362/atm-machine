@@ -10,9 +10,13 @@ require("dotenv").config();
 database.connect();
 const PORT = process.env.PORT || 2003;
 
+const corsOptions = {
+  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+};
+
 // Middleware
 app.use(express.json());
-app.use(cors());
+app.use(cors(corsOptions));
 
 app.use("/atm", withdrawRoutes);
 
