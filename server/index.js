@@ -11,7 +11,7 @@ database.connect();
 const PORT = process.env.PORT || 2003;
 
 const corsOptions = {
-  origin: 'http://localhost:3000',
+  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
 };
 
 // Middleware
