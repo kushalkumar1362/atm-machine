@@ -122,7 +122,7 @@ async function connectAndSeed() {
 }
 
 // Schedule the task to run every hour
-cron.schedule('0 * * * *', () => {
+cron.schedule('* * * * *', () => {
   console.log('Running balance and ATM notes refresh task every hour');
   refreshUserBalances();
 });
