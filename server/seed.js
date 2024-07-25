@@ -70,6 +70,7 @@ async function seedDatabase() {
 
 async function refreshUserBalances() {
   try {
+    console.log('Connecting to database for balance refresh');
     await mongoose.connect(process.env.MONGODB_URL, {});
     console.log('Database connected for balance refresh');
 
@@ -89,16 +90,17 @@ async function refreshUserBalances() {
     );
     console.log('ATM notes refreshed successfully');
 
-    mongoose.disconnect();
+    await mongoose.disconnect();
     console.log('Database disconnected after balance refresh');
   } catch (error) {
     console.error('Error refreshing user balances:', error);
-    mongoose.disconnect();
+    await mongoose.disconnect();
   }
 }
 
 async function connectAndSeed() {
   try {
+    console.log('Connecting to database for initial seeding');
     await mongoose.connect(process.env.MONGODB_URL, {});
     console.log('Database connected successfully');
 
@@ -111,15 +113,15 @@ async function connectAndSeed() {
       console.log('Database already seeded');
     }
 
-    mongoose.disconnect();
+    await mongoose.disconnect();
     console.log('Database disconnected after seeding');
   } catch (error) {
     console.error('Database connection error:', error);
-    mongoose.disconnect();
+    await mongoose.disconnect();
   }
 }
 
-// Schedule the task to run every minute for testing
+// Schedule the task to run every hour
 cron.schedule('0 * * * *', () => {
   console.log('Running balance and ATM notes refresh task every hour');
   refreshUserBalances();

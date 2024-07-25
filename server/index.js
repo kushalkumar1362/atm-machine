@@ -11,13 +11,8 @@ database.connect();
 const PORT = process.env.PORT || 2003;
 
 const corsOptions = {
-  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+  origin: process.env.NODE_ENV === 'production' ? process.env.CORS_ORIGIN : 'http://localhost:3000',
 };
-
-// ---------------------------------comment above cors option and uncomment below for local host----------------------
-// const corsOptions = {
-//   origin: 'http://localhost:3000',
-// };
 
 // Middleware
 app.use(express.json());
