@@ -28,21 +28,26 @@ async function refreshUserBalances() {
     await mongoose.connect(process.env.MONGODB_URL, {});
     console.log('Database connected for balance refresh');
 
+    console.log('Initial Balances:', initialBalances);
+
     for (const user of initialBalances) {
-      await User.findOneAndUpdate(
+      const result = await User.findOneAndUpdate(
         { accountNumber: user.accountNumber },
         { balance: user.balance },
         { new: true }
       );
+      console.log(`Updated user ${user.accountNumber}:`, result);
     }
     console.log('User balances refreshed successfully');
 
-    await ATM.findOneAndUpdate(
+    console.log('Initial ATM Notes:', initialATMNotes);
+
+    const atmResult = await ATM.findOneAndUpdate(
       {},
       { notes: initialATMNotes },
       { new: true }
     );
-    console.log('ATM notes refreshed successfully');
+    console.log('ATM notes refreshed successfully:', atmResult);
 
     await mongoose.disconnect();
     console.log('Database disconnected after balance refresh');

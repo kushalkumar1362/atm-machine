@@ -2,7 +2,7 @@ name: Refresh Balances
 
 on:
   schedule:
-    - cron: '* * * * *'  # Runs hourly
+    - cron: '* * * * *'  # Runs every minute for testing
   workflow_dispatch:  # Allows manual triggering
 
 jobs:
@@ -17,6 +17,11 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '20'
+
+      - name: Print MONGODB_URL
+        run: echo $MONGODB_URL
+        env:
+          MONGODB_URL: ${{ secrets.MONGODB_URL }}
 
       - name: Install dependencies
         run: |
