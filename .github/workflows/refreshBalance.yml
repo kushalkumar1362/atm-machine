@@ -1,0 +1,30 @@
+name: Refresh Balances
+
+on:
+  schedule:
+    - cron: '0 * * * *' 
+
+jobs:
+  refresh-balances:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'  # Change this to your Node.js version
+
+      - name: Install dependencies
+        run: |
+          cd server
+          npm install
+
+      - name: Run balance refresh script
+        run: |
+          cd server
+          npm run refresh-balances
+        env:
+          MONGODB_URL: ${{ secrets.MONGODB_URL }}  # Add your MongoDB URL as a secret

@@ -44,11 +44,11 @@ const AmountInput = React.memo(({ token }) => {
         setWithdrawn(true); // Set withdrawn state to true
       }
     } catch (error) {
-      setError(error?.response.data.message); // Show error message from server
-      if (error?.response.data.message === 'Session expired' || error?.response.data.message === 'Insufficient Balance') {
+      if (error?.response.data.message === 'Session expired' || error?.response.data.message === 'Insufficient balance') {
         alert(error?.response.data.message);
-        navigate('/'); // Redirect to the start page
+        navigate('/');
       }
+      setError(error?.response.data.message);
     } finally {
       setAmount('');
       setDenomination('');

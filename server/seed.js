@@ -1,19 +1,10 @@
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
-const cron = require('node-cron');
 dotenv.config();
 
 const User = require('./models/account.model');
 const ATM = require('./models/atm.model');
 const Transaction = require('./models/transaction.model');
-const SeedStatus = require('./models/seedStatus.model');
-
-const initialBalances = [
-  { accountNumber: '1111111111111111', balance: 100000 },
-  { accountNumber: '2222222222222222', balance: 10000 },
-  { accountNumber: '3333333333333333', balance: 20000 },
-  { accountNumber: '4444444444444444', balance: 15000 }
-];
 
 const initialATMNotes = {
   10: 100,
@@ -68,64 +59,22 @@ async function seedDatabase() {
   console.log('Default ATM notes added successfully');
 }
 
-async function refreshUserBalances() {
-  try {
-    console.log('Connecting to database for balance refresh');
-    await mongoose.connect(process.env.MONGODB_URL, {});
-    console.log('Database connected for balance refresh');
-
-    for (const user of initialBalances) {
-      await User.findOneAndUpdate(
-        { accountNumber: user.accountNumber },
-        { balance: user.balance },
-        { new: true }
-      );
-    }
-    console.log('User balances refreshed successfully');
-
-    await ATM.findOneAndUpdate(
-      {},
-      { notes: initialATMNotes },
-      { new: true }
-    );
-    console.log('ATM notes refreshed successfully');
-
-    await mongoose.disconnect();
-    console.log('Database disconnected after balance refresh');
-  } catch (error) {
-    console.error('Error refreshing user balances:', error);
-    await mongoose.disconnect();
-  }
-}
-
 async function connectAndSeed() {
   try {
     console.log('Connecting to database for initial seeding');
     await mongoose.connect(process.env.MONGODB_URL, {});
     console.log('Database connected successfully');
 
-    const seedStatus = await SeedStatus.findOne();
-    if (!seedStatus || !seedStatus.seeded) {
-      await seedDatabase(); // Seed the database initially
-      await SeedStatus.updateOne({}, { seeded: true }, { upsert: true });
-      console.log('Database seeded successfully');
-    } else {
-      console.log('Database already seeded');
-    }
+    await seedDatabase();
+    console.log('Database seeded successfully');
 
     await mongoose.disconnect();
     console.log('Database disconnected after seeding');
+
   } catch (error) {
     console.error('Database connection error:', error);
     await mongoose.disconnect();
   }
 }
 
-// Schedule the task to run every hour
-cron.schedule('0 * * * *', () => {
-  console.log('Running balance and ATM notes refresh task every hour');
-  refreshUserBalances();
-});
-
-// Start the initial seeding
 connectAndSeed();

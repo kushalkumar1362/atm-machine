@@ -6,7 +6,7 @@
     "start": "node index.js",
     "dev": "nodemon index.js",
     "seed": "node seed.js",
-    "startseed": "concurrently -n \"seed,server\" -c \"bgYellow,bgYellow\" \"npm run seed\" \"npm start\"" 
+    "refresh-balances": "node refreshBalances.js"
   },
   "keywords": [],
   "author": "",
