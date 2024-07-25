@@ -21,12 +21,9 @@ const CheckBalance = React.memo(({ token }) => {
         );
         if (response.data.success) {
           setBalance(response.data.balance);
-        } else {
-          setError(response.data.message);
-        }
+        } 
       } catch (error) {
-        console.error('Error fetching balance:', error);
-        setError('Failed to fetch balance');
+        setError(error?.response.data.message);
       } finally {
         setLoading(false);
       }

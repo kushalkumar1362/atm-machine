@@ -25,11 +25,9 @@ const CancelSession = React.memo(({ token, onSessionExpired }) => {
         alert('Session cancelled.');
         onSessionExpired();
         navigate('/');
-      } else {
-        alert('Failed to cancel session.');
-      }
+      } 
     } catch (error) {
-      console.error('Failed to communicate with server.', error);
+      // console.error('Failed to communicate with server.', error);
       alert('Failed to cancel session.');
     } finally {
       setLoading(false); // Reset loading state

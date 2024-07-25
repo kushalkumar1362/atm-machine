@@ -27,7 +27,8 @@ const PinInput = React.memo(({ token }) => {
     }
 
     try {
-      setLoading(true); // Show loading state while processing
+      setLoading(true); 
+
       const response = await axios.post(
         `${baseURL}${endpoint}`,
         { pin },
@@ -37,24 +38,25 @@ const PinInput = React.memo(({ token }) => {
           },
         }
       );
-
       if (response.data.success) {
         toast.success(response.data.message);
         navigate('/balance-or-withdrawal');
-      } else {
-        if (response.data.message === 'Session expired' || response.data.message === 'Invalid Pin') {
-          alert(response.data.message); // Alert user if session expired or pin is invalid
-          navigate('/');
-        }
-        setError(response.data.message);
       }
-      setPin(''); // Clear PIN input after submission
+
     } catch (error) {
-      setError('Failed to connect to the server'); // Handle connection errors
+      setError('');
+      if (error?.response.data.message === 'Session expired' || error?.response.data.message === 'Invalid Pin') {
+        alert(error?.response.data.message);
+        navigate('/');
+      }
+      setError(error.response?.data?.message || 'Failed to connect to the server');
+      return 0;
     } finally {
+      setPin('');
       setLoading(false); // Reset loading state
     }
   }, [pin, baseURL, endpoint, token, navigate, validateInput]);
+
 
   const handleInputChange = (e) => {
     const value = e.target.value;
@@ -71,7 +73,7 @@ const PinInput = React.memo(({ token }) => {
     <div className="flex flex-col items-center justify-center">
 
       <form onSubmit={handleNext} className="flex flex-col items-center">
-      <label htmlFor='password' className="text-2xl mb-4">Enter PIN</label>
+        <label htmlFor='password' className="text-2xl mb-4">Enter PIN</label>
         <input
           type="text"
           name="username"

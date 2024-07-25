@@ -42,18 +42,16 @@ const AmountInput = React.memo(({ token }) => {
       if (response.data.success) {
         toast.success(response.data.message); // Show success message
         setWithdrawn(true); // Set withdrawn state to true
-      } else {
-        setAmount('');
-        setDenomination('');
-        setError(response.data.message); // Show error message from server
-        if (response.data.message === 'Session expired' || response.data.message === 'Insufficient Balance') {
-          alert(response.data.message); 
-          navigate('/'); // Redirect to the start page
-        }
       }
     } catch (error) {
-      setError('Failed to connect to the server'); // Handle connection errors
+      setError(error?.response.data.message); // Show error message from server
+      if (error?.response.data.message === 'Session expired' || error?.response.data.message === 'Insufficient Balance') {
+        alert(error?.response.data.message);
+        navigate('/'); // Redirect to the start page
+      }
     } finally {
+      setAmount('');
+      setDenomination('');
       setLoading(false); // Reset loading state
     }
   }, [amount, denomination, baseURL, endpoint, token, navigate, validateInput]);
@@ -112,7 +110,7 @@ const AmountInput = React.memo(({ token }) => {
       ) : (
         <div className="flex gap-20 items-center justify-center">
           <NavLink to={'/receipt'}>
-              <div className="bg-blue-500 text-white py-2 px-5 rounded mt-4 border-[2px] border-blue-500 hover:bg-slate-50 hover:text-blue-500 transition-all duration-300 font-semibold">
+            <div className="bg-blue-500 text-white py-2 px-5 rounded mt-4 border-[2px] border-blue-500 hover:bg-slate-50 hover:text-blue-500 transition-all duration-300 font-semibold">
               Get Receipt
             </div>
           </NavLink>

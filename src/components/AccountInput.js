@@ -29,7 +29,7 @@ const AccountInput = React.memo(({ setToken }) => {
     }
 
     try {
-      setLoading(true); // Show loading state while processing
+      setLoading(true);
       const response = await axios.post(`${baseURL}${endpoint}`, { accountNumber });
 
       if (response.data.success) {
@@ -41,7 +41,7 @@ const AccountInput = React.memo(({ setToken }) => {
         setError(response.data.message);
       }
     } catch (error) {
-      setError('Failed to connect to the server');
+      setError(error?.response.data.message);
     } finally {
       setLoading(false);
     }

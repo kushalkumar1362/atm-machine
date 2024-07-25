@@ -48,16 +48,15 @@ const Receipt = React.memo(({ token }) => {
           notesToDispense: receipt.notes,
           transactionDate: receipt.transactionDate
         });
-      } else {
-        setError(response.data.message); // Show error message from the server
-        if (response.data.message === 'Session expired') {
-          alert('Session Expired'); // Alert user if session expired
-          navigate('/'); // Redirect to the start page
-        }
       }
     } catch (error) {
-      console.error('Error fetching receipt:', error);
-      setError('Failed to fetch receipt');
+      // console.error('Error fetching receipt:', error);
+
+      setError(error?.response.data.message); // Show error message from the server
+      if (error?.response.data.message === 'Session expired') {
+        alert('Session Expired'); // Alert user if session expired
+        navigate('/'); // Redirect to the start page
+      }
     } finally {
       setLoading(false); // Reset loading state
     }
