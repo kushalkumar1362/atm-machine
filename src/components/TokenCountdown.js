@@ -1,9 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { jwtDecode } from 'jwt-decode'; // Correct import for jwt-decode
+import { jwtDecode } from 'jwt-decode';
 
 const TokenCountdown = ({ token, onSessionExpired }) => {
   const calculateTimeLeft = useCallback(() => {
+    if (!token) {
+      return 0;
+    }
     try {
+      console.log('Token:', token);
       const decodedToken = jwtDecode(token);
       const exp = decodedToken.exp * 1000; // Expiry time in milliseconds
       const now = Date.now(); // Current time in milliseconds
@@ -34,6 +38,7 @@ const TokenCountdown = ({ token, onSessionExpired }) => {
           clearInterval(intervalId);
           if (!alertTriggered) {
             setAlertTriggered(true);
+            alert("Session Expired");
             setTimeout(() => onSessionExpired(), 0);
             return 0;
           }

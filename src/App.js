@@ -6,7 +6,7 @@ import AmountInput from './components/AmountInput';
 import Receipt from './components/Receipt';
 import TokenCountdown from './components/TokenCountdown';
 import CancelSession from './components/CancelSession';
-import { jwtDecode } from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode'; 
 import ProtectedRoute from './ProtectedRoute';
 import AmountBalance from './components/AmountBalance';
 import CheckBalance from './components/CheckBalance';
@@ -60,7 +60,6 @@ const App = () => {
   };
 
   return (
-
     <div>
       <Scroll />
       <div className="flex flex-col items-center justify-center w-screen h-screen bg-gray-100 relative overflow-scroll">

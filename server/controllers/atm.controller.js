@@ -301,10 +301,8 @@ exports.withdraw = async (req, res) => {
     user.transactions.push(transaction._id);
     await user.save();
 
-    await ATM.updateOne(
-      { _id: atm._id },
-      { $inc: { [`notes.${denomination}`]: -notesToDispense[denomination] } }
-    );
+    // Update ATM notes
+    await ATM.updateOne({}, atm);
 
     return res.status(200).json({
       success: true,
