@@ -2,7 +2,7 @@ name: Refresh Balances
 
 on:
   schedule:
-    - cron: '* * * * *'  # Runs every minute for testing
+    - cron: '0 * * * *'  # Runs every minute for testing
   workflow_dispatch:  # Allows manual triggering
 
 jobs:
