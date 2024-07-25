@@ -7,7 +7,6 @@ const TokenCountdown = ({ token, onSessionExpired }) => {
       return 0;
     }
     try {
-      console.log('Token:', token);
       const decodedToken = jwtDecode(token);
       const exp = decodedToken.exp * 1000; // Expiry time in milliseconds
       const now = Date.now(); // Current time in milliseconds
