@@ -55,36 +55,38 @@ const Modal = ({ onClose }) => {
       className={`fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm flex justify-center items-center opacity-0 transition-opacity duration-300 ${isClosing ? 'closing' : ''}`}
     >
       <div className={`flex flex-col mt-10 gap-5 text-white transition-transform transform scale-95 duration-300 ${isClosing ? 'scale-0' : 'scale-100'}`}>
-        <button className='place-self-end' onClick={handleClose}>
+        <button className='place-self-end p-2' onClick={handleClose}>
           <RxCross2 size={30} />
         </button>
-        <div className='bg-indigo-600 rounded-xl px-20 py-10 flex flex-col gap-5 items-center mx-4'>
-          <h1 className='text-3xl font-extrabold'>Account Details</h1>
+        <div className='bg-indigo-600 rounded-xl px-6 py-4 md:px-20 md:py-10 flex flex-col gap-5 items-center mx-4'>
+          <h1 className='text-2xl md:text-3xl font-extrabold'>Account Details</h1>
           {loading ? (
             <p>Loading...</p>
           ) : error ? (
             <p>{error}</p>
           ) : (
-            <table className="min-w-full text-left text-sm font-light">
-              <thead className="border-b font-medium dark:border-neutral-500">
-                <tr>
-                  <th scope="col" className="px-6 py-4">#</th>
-                  <th scope="col" className="px-6 py-4">Account Number</th>
-                  <th scope="col" className="px-6 py-4">Pin</th>
-                  <th scope="col" className="px-6 py-4">Balance</th>
-                </tr>
-              </thead>
-              <tbody>
-                {accounts.map((account, index) => (
-                  <tr key={account.accountNumber} className="border-b dark:border-neutral-500">
-                    <td className="whitespace-nowrap px-6 py-4 font-medium">{index + 1}</td>
-                    <td className="whitespace-nowrap px-6 py-4">{account.accountNumber}</td>
-                    <td className="whitespace-nowrap px-6 py-4">{account.pin}</td>
-                    <td className="whitespace-nowrap px-6 py-4">{account.balance}</td>
+            <div className="overflow-x-auto w-full">
+              <table className="min-w-full text-left text-sm font-light">
+                <thead className="border-b font-medium dark:border-neutral-500">
+                  <tr>
+                    <th scope="col" className="px-2 md:px-6 py-2 md:py-4">#</th>
+                    <th scope="col" className="px-2 md:px-6 py-2 md:py-4">Account Number</th>
+                    <th scope="col" className="px-2 md:px-6 py-2 md:py-4">Pin</th>
+                    <th scope="col" className="px-2 md:px-6 py-2 md:py-4">Balance</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {accounts.map((account, index) => (
+                    <tr key={account.accountNumber} className="border-b dark:border-neutral-500">
+                      <td className="whitespace-nowrap px-2 md:px-6 py-2 md:py-4 font-medium">{index + 1}</td>
+                      <td className="whitespace-nowrap px-2 md:px-6 py-2 md:py-4">{account.accountNumber}</td>
+                      <td className="whitespace-nowrap px-2 md:px-6 py-2 md:py-4">{account.pin}</td>
+                      <td className="whitespace-nowrap px-2 md:px-6 py-2 md:py-4">{account.balance}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
       </div>
