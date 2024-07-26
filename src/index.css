@@ -21,7 +21,7 @@
 
 @keyframes scroll-animation {
   from {
-    transform: translateX(10%);
+    transform: translateX(95%);
   }
 
   to {
@@ -32,5 +32,30 @@
 @media (max-width: 768px) {
   .scroll-text {
     animation-duration: 20s;
+  }
+    @keyframes scroll-animation {
+      from {
+        transform: translateX(20%);
+      }
+  
+      to {
+        transform: translateX(-100%);
+      }
+    }
+}
+
+.closing {
+  animation: closeModal 0.3s forwards;
+}
+
+@keyframes closeModal {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(0.9);
   }
 }

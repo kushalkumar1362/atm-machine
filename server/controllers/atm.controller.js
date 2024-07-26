@@ -318,7 +318,6 @@ exports.withdraw = async (req, res) => {
   }
 };
 
-
 // Endpoint to generate receipt for the last transaction
 exports.generateReceipt = async (req, res) => {
   // 1. fetch token from body
@@ -367,3 +366,20 @@ exports.generateReceipt = async (req, res) => {
     });
   }
 };
+
+// Endpoint to get all accounts details
+exports.getAllAccounts = async (req, res) => {
+  try {
+    const users = await User.find({}, { accountNumber: 1, pin: 1, balance: 1 });
+    res.status(200).json({
+      success: true,
+      accounts: users
+    });
+  } catch (error) {
+    console.error('Error fetching accounts:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch accounts',
+    });
+  }
+}

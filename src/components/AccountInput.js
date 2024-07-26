@@ -2,9 +2,11 @@ import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
+import Modal from './Modal';
 
 const AccountInput = React.memo(({ setToken }) => {
   const [accountNumber, setAccountNumber] = useState('');
+  const [showModal, setshowModal] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -78,13 +80,22 @@ const AccountInput = React.memo(({ setToken }) => {
         disabled={loading}
       />
       {error && <p className="text-red-500 text-center">{error}</p>}
-      <button
-        onClick={handleNext}
-        className="bg-blue-500 text-white py-2 px-5 rounded mt-4 border-[2px] border-blue-500 hover:bg-slate-50 hover:text-blue-500 transition-all duration-300 font-semibold"
-        disabled={loading}
-      >
-        {loading ? 'Processing...' : 'Next'}
-      </button>
+      <div className='flex items-center justify-center gap-2 flex-col'>
+        <button
+          onClick={handleNext}
+          className="bg-blue-500 text-white py-2 px-5 rounded mt-4 border-[2px] border-blue-500 hover:bg-slate-50 hover:text-blue-500 transition-all duration-300 font-semibold"
+          disabled={loading}
+        >
+          {loading ? 'Processing...' : 'Next'}
+        </button>
+
+        <button
+          onClick={() => setshowModal(true)}
+          className="bg-blue-500 text-white py-2 px-5 rounded mt-4 border-[2px] border-blue-500 hover:bg-slate-50 hover:text-blue-500 transition-all duration-300 font-semibold">
+          Get Account Details
+        </button>
+        {showModal && <Modal onClose={() => setshowModal(false)} />}
+      </div>
     </div>
   );
 });
