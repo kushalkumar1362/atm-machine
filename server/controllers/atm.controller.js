@@ -146,6 +146,7 @@ exports.checkPin = async (req, res) => {
     }
     user.failedAttempts = 0;
     user.blockUntil = null;
+    user.lastFailedAttempt = null;
     await user.save();
 
     return res.status(200).json({
